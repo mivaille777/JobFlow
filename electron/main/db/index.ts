@@ -22,3 +22,4 @@ export function getAppDatabase(): DatabaseContext {
 export { createDatabase } from './client'
 export * from './repositories'
 export * from './schema'
+export * from './transaction'
