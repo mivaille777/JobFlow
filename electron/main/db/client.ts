@@ -1,10 +1,9 @@
 import { drizzle } from 'drizzle-orm/node-sqlite'
 import { DatabaseSync } from 'node:sqlite'
 import { applyMigrations } from './migrations'
-import { schema } from './schema'
 
 function createDrizzleDatabase(sqlite: DatabaseSync) {
-  return drizzle({ client: sqlite, schema })
+  return drizzle({ client: sqlite })
 }
 
 export type JobFlowDatabase = ReturnType<typeof createDrizzleDatabase>
