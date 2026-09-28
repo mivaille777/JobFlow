@@ -1,11 +1,17 @@
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { _electron as electron, expect, test } from '@playwright/test'
+import {
+  _electron as electron,
+  expect,
+  test,
+  type ElectronApplication,
+  type Locator,
+  type Page
+} from '@playwright/test'
 
-test('新增岗位 → 投递 → 面试复盘 → Offer 主链路', async () => {
-  const userDataDirectory = mkdtempSync(join(tmpdir(), 'jobflow-e2e-'))
-  const electronApp = await electron.launch({
+async function launchJobFlow(userDataDirectory: string): Promise<ElectronApplication> {
+  return electron.launch({
     args: ['--no-sandbox', '.'],
     cwd: process.cwd(),
     env: {
@@ -13,9 +19,34 @@ test('新增岗位 → 投递 → 面试复盘 → Offer 主链路', async () =>
       JOBFLOW_USER_DATA_DIR: userDataDirectory
     }
   })
+}
+
+async function dragWithPointer(page: Page, source: Locator, target: Locator): Promise<void> {
+  await source.scrollIntoViewIfNeeded()
+  await target.scrollIntoViewIfNeeded()
+
+  const sourceBox = await source.boundingBox()
+  const targetBox = await target.boundingBox()
+  if (!sourceBox || !targetBox) throw new Error('Kanban drag target is not visible.')
+
+  const sourceX = sourceBox.x + sourceBox.width / 2
+  const sourceY = sourceBox.y + sourceBox.height / 2
+  const targetX = targetBox.x + targetBox.width / 2
+  const targetY = targetBox.y + Math.min(100, targetBox.height / 3)
+
+  await page.mouse.move(sourceX, sourceY)
+  await page.mouse.down()
+  await page.mouse.move(sourceX + 12, sourceY + 12, { steps: 4 })
+  await page.mouse.move(targetX, targetY, { steps: 12 })
+  await page.mouse.up()
+}
+
+test('V1 最终验收：新增 → 测评 → 面试复盘 → Kanban → Offer → 持久化', async () => {
+  const userDataDirectory = mkdtempSync(join(tmpdir(), 'jobflow-e2e-'))
+  let electronApp = await launchJobFlow(userDataDirectory)
 
   try {
-    const page = await electronApp.firstWindow()
+    let page = await electronApp.firstWindow()
     console.log('E2E checkpoint: window-ready')
     await expect(page).toHaveTitle('JobFlow')
     await expect(page.getByText('JobFlow', { exact: true })).toBeVisible()
@@ -30,12 +61,25 @@ test('新增岗位 → 投递 → 面试复盘 → Offer 主链路', async () =>
 
     const applicationDrawer = page.locator('aside').filter({ hasText: 'Agent Engineer' })
     await expect(applicationDrawer.getByText('E2E Labs', { exact: true })).toBeVisible()
+
+    await applicationDrawer.getByLabel('优先级').selectOption('S')
+    await expect(applicationDrawer.getByLabel('优先级')).toHaveValue('S')
+
     await applicationDrawer.getByLabel('状态').selectOption('已投递')
-    await expect(page.getByText('已更新', { exact: true })).toBeVisible()
+    await expect(
+      applicationDrawer.getByText('待投递 → 已投递', { exact: true })
+    ).toBeVisible()
+
     await applicationDrawer.getByLabel('当前节点').fill('简历筛选')
     await applicationDrawer.getByLabel('当前节点').press('Tab')
+
+    await applicationDrawer.getByLabel('状态').selectOption('测评/笔试')
+    await expect(
+      applicationDrawer.getByText('已投递 → 测评/笔试', { exact: true })
+    ).toBeVisible()
+
     await applicationDrawer.getByRole('button', { name: '关闭岗位详情' }).click()
-    console.log('E2E checkpoint: application-progressed')
+    console.log('E2E checkpoint: application-assessment')
 
     await page.getByRole('link', { name: '面试 Interviews' }).click()
     await page.getByRole('button', { name: '+ 添加面试' }).click()
@@ -59,13 +103,48 @@ test('新增岗位 → 投递 → 面试复盘 → Offer 主链路', async () =>
     console.log('E2E checkpoint: interview-reviewed')
 
     await page.getByRole('link', { name: /投递/ }).click()
+    await page.getByRole('button', { name: '看板', exact: true }).click()
+
+    const card = page.locator('article').filter({ hasText: 'E2E Labs' })
+    const interviewLane = page.getByLabel('面试 看板列')
+    await expect(card).toBeVisible()
+    await dragWithPointer(page, card, interviewLane)
+    await expect(interviewLane.getByText('E2E Labs', { exact: true })).toBeVisible()
+    console.log('E2E checkpoint: kanban-interview')
+
+    await page.getByRole('button', { name: '列表', exact: true }).click()
+    await expect(page.getByLabel('E2E Labs 状态')).toHaveValue('面试中')
     await page.getByLabel('E2E Labs 状态').selectOption('Offer阶段')
     await expect(page.getByLabel('E2E Labs 状态')).toHaveValue('Offer阶段')
-    await expect(page.getByText('已更新', { exact: true })).toBeVisible()
     console.log('E2E checkpoint: offer-complete')
+
+    await page.getByRole('row').filter({ hasText: 'E2E Labs' }).click()
+    const finalDrawer = page.locator('aside').filter({ hasText: 'Agent Engineer' })
+    await expect(
+      finalDrawer.getByText('测评/笔试 → 面试中', { exact: true })
+    ).toBeVisible()
+    await expect(
+      finalDrawer.getByText('面试中 → Offer阶段', { exact: true })
+    ).toBeVisible()
+    await finalDrawer.getByRole('button', { name: '关闭岗位详情' }).click()
+    console.log('E2E checkpoint: timeline-verified')
+
+    await electronApp.close()
+    console.log('E2E checkpoint: first-session-closed')
+
+    electronApp = await launchJobFlow(userDataDirectory)
+    page = await electronApp.firstWindow()
+    await page.getByRole('link', { name: '投递 Applications' }).click()
+    await expect(page.getByLabel('E2E Labs 状态')).toHaveValue('Offer阶段')
+
+    await page.getByRole('link', { name: '面试 Interviews' }).click()
+    await expect(
+      page.getByRole('button', { name: /E2E Labs · Agent Engineer/ })
+    ).toBeVisible()
+    console.log('E2E checkpoint: persistence-verified')
   } finally {
     console.log('E2E checkpoint: closing-electron')
-    await electronApp.close()
+    await electronApp.close().catch(() => undefined)
     console.log('E2E checkpoint: electron-closed')
     rmSync(userDataDirectory, { recursive: true, force: true })
   }
