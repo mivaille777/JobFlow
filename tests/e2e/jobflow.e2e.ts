@@ -169,11 +169,15 @@ test('投递选项自定义、校招/实习筛选与删除岗位', async () => {
 
     await optionsDialog.getByLabel('新增岗位方向').fill('Agent Infra')
     await optionsDialog.getByRole('button', { name: '添加方向' }).click()
-    await expect(optionsDialog.getByText('Agent Infra', { exact: true })).toBeVisible()
+    await expect(
+      optionsDialog.getByRole('button', { name: '删除 Agent Infra' })
+    ).toBeVisible()
 
     await optionsDialog.getByLabel('新增投递渠道').fill('校园官网')
     await optionsDialog.getByRole('button', { name: '添加渠道' }).click()
-    await expect(optionsDialog.getByText('校园官网', { exact: true })).toBeVisible()
+    await expect(
+      optionsDialog.getByRole('button', { name: '删除 校园官网' })
+    ).toBeVisible()
     await optionsDialog.getByRole('button', { name: '完成' }).click()
 
     await page.getByRole('button', { name: '+ 新增岗位' }).first().click()
