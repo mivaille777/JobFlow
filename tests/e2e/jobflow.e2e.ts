@@ -6,7 +6,7 @@ import { _electron as electron, expect, test } from '@playwright/test'
 test('新增岗位 → 投递 → 面试复盘 → Offer 主链路', async () => {
   const userDataDirectory = mkdtempSync(join(tmpdir(), 'jobflow-e2e-'))
   const electronApp = await electron.launch({
-    args: ['.'],
+    args: ['--no-sandbox', '.'],
     cwd: process.cwd(),
     env: {
       ...process.env,
