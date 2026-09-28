@@ -3,6 +3,7 @@ import {
   applicationPriorities,
   applicationStatuses,
   type ApplicationDetail,
+  type ApplicationEvent,
   type ApplicationPatch
 } from '../../shared/application'
 
@@ -24,7 +25,6 @@ function Field({
   onCommit: (value: string | null) => void
 }) {
   const [draft, setDraft] = useState(value ?? '')
-
   useEffect(() => setDraft(value ?? ''), [value])
 
   return (
@@ -44,26 +44,51 @@ function Field({
   )
 }
 
+function eventSummary(event: ApplicationEvent): string | null {
+  if (event.oldValue && event.newValue) return `${event.oldValue} → ${event.newValue}`
+  if (event.newValue) return event.newValue
+  if (event.oldValue) return `${event.oldValue} → 空`
+  return event.description
+}
+
+function formatTimelineTime(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat('zh-CN', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date)
+}
+
 export function ApplicationDetailDrawer({
   applicationId,
   onClose,
   onUpdated
 }: ApplicationDetailDrawerProps) {
   const [detail, setDetail] = useState<ApplicationDetail | null>(null)
+  const [events, setEvents] = useState<ApplicationEvent[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
     if (!applicationId) {
       setDetail(null)
+      setEvents([])
       return
     }
 
     setLoading(true)
     setError('')
-    void window.jobflow.applications
-      .get(applicationId)
-      .then(setDetail)
+    void Promise.all([
+      window.jobflow.applications.get(applicationId),
+      window.jobflow.applications.events(applicationId)
+    ])
+      .then(([application, timeline]) => {
+        setDetail(application)
+        setEvents(timeline)
+      })
       .catch(() => setError('读取岗位详情失败。'))
       .finally(() => setLoading(false))
   }, [applicationId])
@@ -88,6 +113,13 @@ export function ApplicationDetailDrawer({
       const updated = await window.jobflow.applications.update(detail.id, patch)
       setDetail(updated)
       onUpdated(updated)
+      if (
+        patch.status !== undefined ||
+        patch.stage !== undefined ||
+        patch.finalResult !== undefined
+      ) {
+        setEvents(await window.jobflow.applications.events(detail.id))
+      }
     } catch {
       setDetail(previous)
       setError('保存失败，已恢复原值。')
@@ -206,6 +238,40 @@ export function ApplicationDetailDrawer({
               </section>
 
               <section>
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">Timeline</h3>
+                  <span className="text-xs text-muted">{events.length} 条</span>
+                </div>
+                {events.length === 0 ? (
+                  <div className="rounded-xl bg-slate-50 px-4 py-5 text-sm text-muted">
+                    暂无流程事件。
+                  </div>
+                ) : (
+                  <ol className="space-y-0">
+                    {events.map((event, index) => (
+                      <li key={event.id} className="relative pl-6">
+                        {index < events.length - 1 ? (
+                          <span className="absolute bottom-0 left-[5px] top-3 w-px bg-line" />
+                        ) : null}
+                        <span className="absolute left-0 top-2 h-2.5 w-2.5 rounded-full border-2 border-white bg-slate-400 ring-1 ring-slate-200" />
+                        <div className="pb-5">
+                          <div className="flex items-start justify-between gap-3">
+                            <span className="text-sm font-medium">{event.title}</span>
+                            <span className="shrink-0 text-[11px] text-slate-400">
+                              {formatTimelineTime(event.createdAt)}
+                            </span>
+                          </div>
+                          {eventSummary(event) ? (
+                            <div className="mt-1 text-xs text-muted">{eventSummary(event)}</div>
+                          ) : null}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </section>
+
+              <section>
                 <h3 className="mb-3 text-sm font-semibold">岗位信息</h3>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field label="Base" value={detail.location} onCommit={(value) => void save({ location: value })} />
@@ -258,10 +324,6 @@ export function ApplicationDetailDrawer({
                   }}
                   className="w-full resize-y rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-slate-400"
                 />
-              </section>
-
-              <section className="rounded-xl border border-dashed border-line p-4 text-sm text-muted">
-                完整状态 Timeline 将在 Stage 4 接入，这里不会用静态假数据占位。
               </section>
             </div>
           </>
