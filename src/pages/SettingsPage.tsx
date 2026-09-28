@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { PreferencesPanel } from '../features/settings/PreferencesPanel'
 import type { ExcelImportPreview } from '../shared/transfer'
 
@@ -7,6 +7,14 @@ export function SettingsPage() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [appVersion, setAppVersion] = useState('—')
+
+  useEffect(() => {
+    void window.jobflow.app
+      .getVersion()
+      .then(setAppVersion)
+      .catch(() => setAppVersion('—'))
+  }, [])
 
   async function chooseExcel() {
     setBusy(true)
@@ -114,6 +122,16 @@ export function SettingsPage() {
       <div className="mt-7">
         <PreferencesPanel />
       </div>
+
+      <section className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-white px-6 py-5 shadow-panel">
+        <div>
+          <h2 className="text-base font-semibold">关于 JobFlow</h2>
+          <p className="mt-1 text-sm text-muted">本地优先的秋招 / 校招投递管理工具。</p>
+        </div>
+        <div className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
+          v{appVersion}
+        </div>
+      </section>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <section className="rounded-2xl border border-line bg-white p-6 shadow-panel">
