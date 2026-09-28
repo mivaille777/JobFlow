@@ -41,7 +41,7 @@ test('新增岗位 → 投递 → 面试复盘 → Offer 主链路', async () =>
     await page.getByRole('button', { name: '+ 添加面试' }).click()
     await page.getByLabel('岗位').selectOption({ label: 'E2E Labs · Agent Engineer' })
     await page.getByLabel('轮次').selectOption('一面')
-    await page.getByRole('button', { name: '添加面试' }).click()
+    await page.getByRole('button', { name: '添加面试', exact: true }).click()
     console.log('E2E checkpoint: interview-created')
 
     const interviewRow = page.getByRole('button', { name: /E2E Labs · Agent Engineer/ })
