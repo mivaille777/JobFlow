@@ -9,9 +9,11 @@ export const applicationStatuses = [
 ] as const
 
 export const applicationPriorities = ['S', 'A', 'B', 'C'] as const
+export const applicationRecruitmentTypes = ['校招', '实习'] as const
 
 export type ApplicationStatus = (typeof applicationStatuses)[number]
 export type ApplicationPriority = (typeof applicationPriorities)[number]
+export type ApplicationRecruitmentType = (typeof applicationRecruitmentTypes)[number]
 
 export interface ApplicationListItem {
   id: string
@@ -19,6 +21,7 @@ export interface ApplicationListItem {
   companyName: string
   jobTitle: string
   direction: string | null
+  recruitmentType: string
   location: string | null
   priority: string
   status: string
@@ -56,6 +59,7 @@ export interface CreateApplicationRequest {
   companyName: string
   jobTitle: string
   direction?: string | null
+  recruitmentType?: string
   location?: string | null
   priority?: string
   status?: string
@@ -75,6 +79,7 @@ export interface ApplicationPatch {
   nextAction?: string | null
   nextActionDate?: string | null
   direction?: string | null
+  recruitmentType?: string
   location?: string | null
   jobUrl?: string | null
   jobId?: string | null

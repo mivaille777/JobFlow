@@ -95,6 +95,13 @@ const migrations: Migration[] = [
     sql: `
       ALTER TABLE applications ADD COLUMN batch TEXT;
     `
+  },
+  {
+    version: 3,
+    name: 'add_application_recruitment_type',
+    sql: `
+      ALTER TABLE applications ADD COLUMN recruitment_type TEXT NOT NULL DEFAULT '校招';
+    `
   }
 ]
 

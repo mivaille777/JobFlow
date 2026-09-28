@@ -7,6 +7,7 @@ export interface ApplicationFilters {
   search: string
   status: string
   direction: string
+  recruitmentType: string
   priority: string
   channel: string
   quick: QuickFilter
@@ -46,6 +47,7 @@ export function filterAndSortApplications(
 
       if (filters.status && item.status !== filters.status) return false
       if (filters.direction && item.direction !== filters.direction) return false
+      if (filters.recruitmentType && item.recruitmentType !== filters.recruitmentType) return false
       if (filters.priority && item.priority !== filters.priority) return false
       if (filters.channel && item.channel !== filters.channel) return false
 

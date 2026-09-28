@@ -4,7 +4,10 @@ import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { createDatabase } from '../electron/main/db'
 import { SettingsService } from '../electron/main/services/settings'
-import { defaultJobDirections } from '../src/shared/settings'
+import {
+  defaultApplicationChannels,
+  defaultJobDirections
+} from '../src/shared/settings'
 
 const directories: string[] = []
 
@@ -33,6 +36,7 @@ describe('settings service', () => {
       theme: 'system',
       defaultPriority: 'A',
       directions: [...defaultJobDirections],
+      channels: [...defaultApplicationChannels],
       databasePath
     })
     context.sqlite.close()
@@ -44,28 +48,32 @@ describe('settings service', () => {
     const updated = service.update({
       theme: 'dark',
       defaultPriority: 'S',
-      directions: ['AI Agent', ' RAG/检索 ', 'AI Agent']
+      directions: ['AI Agent', ' RAG/检索 ', 'AI Agent'],
+      channels: ['官网', ' 内推 ', '官网']
     })
 
     expect(updated).toMatchObject({
       theme: 'dark',
       defaultPriority: 'S',
-      directions: ['AI Agent', 'RAG/检索']
+      directions: ['AI Agent', 'RAG/检索'],
+      channels: ['官网', '内推']
     })
 
     const reopened = new SettingsService(context.db, 'another-path')
     expect(reopened.get()).toMatchObject({
       theme: 'dark',
       defaultPriority: 'S',
-      directions: ['AI Agent', 'RAG/检索']
+      directions: ['AI Agent', 'RAG/检索'],
+      channels: ['官网', '内推']
     })
 
     context.sqlite.close()
   })
 
-  it('rejects an empty directions list', () => {
+  it('rejects empty option lists', () => {
     const { context, service } = createService()
     expect(() => service.update({ directions: [] })).toThrow()
+    expect(() => service.update({ channels: [] })).toThrow()
     context.sqlite.close()
   })
 })

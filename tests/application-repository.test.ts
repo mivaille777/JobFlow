@@ -30,13 +30,15 @@ describe('ApplicationRepository', () => {
       jobTitle: 'Agent Engineer',
       priority: 'S',
       status: '已投递',
-      direction: 'AI Agent'
+      direction: 'AI Agent',
+      recruitmentType: '实习'
     })
 
     expect(applications.getById(created.id)).toMatchObject({
       jobTitle: 'Agent Engineer',
       priority: 'S',
-      status: '已投递'
+      status: '已投递',
+      recruitmentType: '实习'
     })
     expect(applications.getDetailWithCompany(created.id)?.companyName).toBe('Repository Labs')
 

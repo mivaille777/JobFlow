@@ -2,12 +2,16 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { showToast } from '../../app/toast'
 import {
   applicationPriorities,
+  applicationRecruitmentTypes,
   applicationStatuses,
   type ApplicationDetail,
   type ApplicationPriority,
   type CreateApplicationRequest
 } from '../../shared/application'
-import { defaultJobDirections } from '../../shared/settings'
+import {
+  defaultApplicationChannels,
+  defaultJobDirections
+} from '../../shared/settings'
 
 interface QuickAddDialogProps {
   open: boolean
@@ -24,6 +28,7 @@ const initialForm = (
   companyName: '',
   jobTitle: '',
   direction,
+  recruitmentType: '校招',
   priority: defaultPriority,
   status: '待投递',
   jobUrl: '',
@@ -39,6 +44,7 @@ const initialForm = (
 export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps) {
   const [form, setForm] = useState<CreateApplicationRequest>(initialForm)
   const [directions, setDirections] = useState<string[]>([...defaultJobDirections])
+  const [channels, setChannels] = useState<string[]>([...defaultApplicationChannels])
   const [defaultPriority, setDefaultPriority] = useState<ApplicationPriority>('A')
   const [advanced, setAdvanced] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -53,6 +59,7 @@ export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps
       .then((settings) => {
         if (cancelled) return
         setDirections(settings.directions)
+        setChannels(settings.channels)
         setDefaultPriority(settings.defaultPriority)
         setForm(initialForm(settings.defaultPriority, settings.directions[0]))
       })
@@ -113,7 +120,7 @@ export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps
       />
       <form
         onSubmit={(event) => void submit(event)}
-        className="jobflow-dialog-in relative z-10 w-full max-w-xl rounded-2xl border border-line bg-white shadow-2xl"
+        className="jobflow-dialog-in relative z-10 w-full max-w-2xl rounded-2xl border border-line bg-white shadow-2xl"
       >
         <div className="flex items-start justify-between border-b border-line px-6 py-5">
           <div>
@@ -148,7 +155,7 @@ export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps
             </label>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <label className="space-y-1.5 text-sm">
               <span className="font-medium">岗位方向</span>
               <select
@@ -158,6 +165,18 @@ export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps
               >
                 {directions.map((direction) => (
                   <option key={direction} value={direction}>{direction}</option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-1.5 text-sm">
+              <span className="font-medium">招聘类型</span>
+              <select
+                value={form.recruitmentType}
+                onChange={(event) => update('recruitmentType', event.target.value)}
+                className="w-full rounded-lg border border-line bg-white px-3 py-2"
+              >
+                {applicationRecruitmentTypes.map((type) => (
+                  <option key={type} value={type}>{type}</option>
                 ))}
               </select>
             </label>
@@ -210,7 +229,6 @@ export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps
               {[
                 ['location', 'Base / 地点'],
                 ['jobId', 'Job ID'],
-                ['channel', '投递渠道'],
                 ['referral', '内推人 / 内推码'],
                 ['resumeVersion', '简历版本']
               ].map(([key, label]) => (
@@ -225,6 +243,19 @@ export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps
                   />
                 </label>
               ))}
+              <label className="space-y-1.5 text-sm">
+                <span className="font-medium">投递渠道</span>
+                <select
+                  value={form.channel ?? ''}
+                  onChange={(event) => update('channel', event.target.value || null)}
+                  className="w-full rounded-lg border border-line bg-white px-3 py-2"
+                >
+                  <option value="">未设置</option>
+                  {channels.map((channel) => (
+                    <option key={channel} value={channel}>{channel}</option>
+                  ))}
+                </select>
+              </label>
               <label className="space-y-1.5 text-sm">
                 <span className="font-medium">投递日期</span>
                 <input

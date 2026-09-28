@@ -13,6 +13,7 @@ export interface ImportedApplicationRow {
   companyName: string
   jobTitle: string
   direction: string | null
+  recruitmentType: string
   location: string | null
   priority: string
   status: string
@@ -61,6 +62,7 @@ export class TransferRepository {
         companyName: companies.name,
         jobTitle: applications.jobTitle,
         direction: applications.direction,
+        recruitmentType: applications.recruitmentType,
         location: applications.location,
         status: applications.status,
         stage: applications.stage,
@@ -102,6 +104,7 @@ export class TransferRepository {
       companyId: company.id,
       jobTitle: input.jobTitle,
       direction: input.direction,
+      recruitmentType: input.recruitmentType,
       location: input.location,
       priority: input.priority,
       status: input.status,

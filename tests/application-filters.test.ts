@@ -12,6 +12,7 @@ const items: ApplicationListItem[] = [
     companyName: 'ByteDance',
     jobTitle: 'AI Agent Engineer',
     direction: 'AI Agent',
+    recruitmentType: '校招',
     location: 'Beijing',
     priority: 'S',
     status: '面试中',
@@ -29,6 +30,7 @@ const items: ApplicationListItem[] = [
     companyName: 'vivo',
     jobTitle: 'LLM Algorithm Engineer',
     direction: 'LLM算法',
+    recruitmentType: '实习',
     location: 'Shenzhen',
     priority: 'A',
     status: '已投递',
@@ -46,6 +48,7 @@ const base: ApplicationFilters = {
   search: '',
   status: '',
   direction: '',
+  recruitmentType: '',
   priority: '',
   channel: '',
   quick: 'all',
@@ -63,6 +66,7 @@ describe('application filters', () => {
     expect(filterAndSortApplications(items, { ...base, status: '面试中' })[0]?.id).toBe('1')
     expect(filterAndSortApplications(items, { ...base, priority: 'A' })[0]?.id).toBe('2')
     expect(filterAndSortApplications(items, { ...base, channel: '内推' })[0]?.id).toBe('1')
+    expect(filterAndSortApplications(items, { ...base, recruitmentType: '实习' })[0]?.id).toBe('2')
   })
 
   it('finds actions due within seven days', () => {

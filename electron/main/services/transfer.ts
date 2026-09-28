@@ -4,6 +4,7 @@ import { basename } from 'node:path'
 import ExcelJS, { type Cell, type Worksheet } from 'exceljs'
 import {
   applicationPriorities,
+  applicationRecruitmentTypes,
   applicationStatuses
 } from '../../../src/shared/application'
 import type {
@@ -35,6 +36,7 @@ const COLUMN_NAMES = [
   '优先级',
   '公司',
   '岗位',
+  '招聘类型',
   '岗位方向',
   'Base',
   '当前阶段',
@@ -101,6 +103,15 @@ function normalizeStatus(value: string | null): string {
     : '待投递'
 }
 
+function normalizeRecruitmentType(value: string | null): string {
+  return value &&
+    applicationRecruitmentTypes.includes(
+      value as (typeof applicationRecruitmentTypes)[number]
+    )
+    ? value
+    : '校招'
+}
+
 function normalizeIdentityPart(value: string | null): string {
   return (value ?? '').trim().toLocaleLowerCase()
 }
@@ -161,6 +172,7 @@ export function parseImportWorksheet(worksheet: Worksheet): ImportCandidate[] {
       rowNumber,
       companyName,
       jobTitle,
+      recruitmentType: normalizeRecruitmentType(text(cell(rowNumber, '招聘类型'))),
       direction: text(cell(rowNumber, '岗位方向')),
       location: text(cell(rowNumber, 'Base')),
       priority: normalizePriority(text(cell(rowNumber, '优先级'))),
@@ -289,6 +301,7 @@ export class TransferService {
         优先级: row.priority,
         公司: row.companyName,
         岗位: row.jobTitle,
+        招聘类型: row.recruitmentType,
         岗位方向: row.direction,
         Base: row.location,
         当前阶段: row.status,

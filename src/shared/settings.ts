@@ -12,10 +12,20 @@ export const defaultJobDirections = [
   '其他'
 ] as const
 
+export const defaultApplicationChannels = [
+  '官网',
+  '内推',
+  'Boss直聘',
+  '牛客',
+  '实习僧',
+  '其他'
+] as const
+
 export interface JobFlowSettings {
   theme: ThemePreference
   defaultPriority: ApplicationPriority
   directions: string[]
+  channels: string[]
   databasePath: string
 }
 
@@ -23,4 +33,5 @@ export interface JobFlowSettingsPatch {
   theme?: ThemePreference
   defaultPriority?: ApplicationPriority
   directions?: string[]
+  channels?: string[]
 }

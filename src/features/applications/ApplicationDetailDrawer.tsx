@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { applicationPriorityClass, applicationStatusClass } from '../../app/presentation'
 import { showToast } from '../../app/toast'
+import type { JobFlowSettings } from '../../shared/settings'
 import {
   applicationPriorities,
+  applicationRecruitmentTypes,
   applicationStatuses,
   type ApplicationDetail,
   type ApplicationEvent,
@@ -13,6 +15,7 @@ interface ApplicationDetailDrawerProps {
   applicationId: string | null
   onClose: () => void
   onUpdated: (application: ApplicationDetail) => void
+  onDeleted: (applicationId: string) => void
 }
 
 function Field({
@@ -67,12 +70,16 @@ function formatTimelineTime(value: string): string {
 export function ApplicationDetailDrawer({
   applicationId,
   onClose,
-  onUpdated
+  onUpdated,
+  onDeleted
 }: ApplicationDetailDrawerProps) {
   const [detail, setDetail] = useState<ApplicationDetail | null>(null)
   const [events, setEvents] = useState<ApplicationEvent[]>([])
+  const [settings, setSettings] = useState<JobFlowSettings | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!applicationId) {
@@ -85,11 +92,13 @@ export function ApplicationDetailDrawer({
     setError('')
     void Promise.all([
       window.jobflow.applications.get(applicationId),
-      window.jobflow.applications.events(applicationId)
+      window.jobflow.applications.events(applicationId),
+      window.jobflow.settings.get()
     ])
-      .then(([application, timeline]) => {
+      .then(([application, timeline, currentSettings]) => {
         setDetail(application)
         setEvents(timeline)
+        setSettings(currentSettings)
       })
       .catch(() => setError('读取岗位详情失败。'))
       .finally(() => setLoading(false))
@@ -105,6 +114,20 @@ export function ApplicationDetailDrawer({
   }, [applicationId, onClose])
 
   if (!applicationId) return null
+
+  async function deleteApplication() {
+    if (!detail || deleting) return
+    setDeleting(true)
+    setError('')
+    try {
+      await window.jobflow.applications.delete(detail.id)
+      onDeleted(detail.id)
+    } catch (reason) {
+      console.error('Failed to delete application', reason)
+      setError('删除岗位失败，请重试。')
+      setDeleting(false)
+    }
+  }
 
   async function save(patch: ApplicationPatch) {
     if (!detail) return
@@ -157,6 +180,9 @@ export function ApplicationDetailDrawer({
                     </span>
                     <span className={`rounded-full px-2.5 py-1 ${applicationStatusClass(detail.status)}`}>
                       {detail.status}{detail.stage ? ` · ${detail.stage}` : ''}
+                    </span>
+                    <span className="rounded-full bg-violet-50 px-2.5 py-1 font-medium text-violet-700">
+                      {detail.recruitmentType}
                     </span>
                     {detail.location ? (
                       <span className="rounded-full bg-slate-50 px-2.5 py-1 text-muted">
@@ -231,17 +257,40 @@ export function ApplicationDetailDrawer({
                       ))}
                     </select>
                   </label>
+                  <label className="space-y-1.5 text-sm">
+                    <span className="text-xs font-medium text-muted">招聘类型</span>
+                    <select
+                      value={detail.recruitmentType}
+                      onChange={(event) => void save({ recruitmentType: event.target.value })}
+                      className="w-full rounded-lg border border-line bg-white px-3 py-2"
+                    >
+                      {applicationRecruitmentTypes.map((type) => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </label>
                   <Field
                     label="当前节点"
                     value={detail.stage}
                     placeholder="例如：二面待面"
                     onCommit={(value) => void save({ stage: value })}
                   />
-                  <Field
-                    label="岗位方向"
-                    value={detail.direction}
-                    onCommit={(value) => void save({ direction: value })}
-                  />
+                  <label className="space-y-1.5 text-sm">
+                    <span className="text-xs font-medium text-muted">岗位方向</span>
+                    <select
+                      value={detail.direction ?? ''}
+                      onChange={(event) => void save({ direction: event.target.value || null })}
+                      className="w-full rounded-lg border border-line bg-white px-3 py-2"
+                    >
+                      <option value="">未设置</option>
+                      {Array.from(new Set([
+                        ...(settings?.directions ?? []),
+                        ...(detail.direction ? [detail.direction] : [])
+                      ])).map((direction) => (
+                        <option key={direction} value={direction}>{direction}</option>
+                      ))}
+                    </select>
+                  </label>
                 </div>
               </section>
 
@@ -284,7 +333,22 @@ export function ApplicationDetailDrawer({
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field label="Base" value={detail.location} onCommit={(value) => void save({ location: value })} />
                   <Field label="Job ID" value={detail.jobId} onCommit={(value) => void save({ jobId: value })} />
-                  <Field label="投递渠道" value={detail.channel} onCommit={(value) => void save({ channel: value })} />
+                  <label className="space-y-1.5 text-sm">
+                    <span className="text-xs font-medium text-muted">投递渠道</span>
+                    <select
+                      value={detail.channel ?? ''}
+                      onChange={(event) => void save({ channel: event.target.value || null })}
+                      className="w-full rounded-lg border border-line bg-white px-3 py-2"
+                    >
+                      <option value="">未设置</option>
+                      {Array.from(new Set([
+                        ...(settings?.channels ?? []),
+                        ...(detail.channel ? [detail.channel] : [])
+                      ])).map((channel) => (
+                        <option key={channel} value={channel}>{channel}</option>
+                      ))}
+                    </select>
+                  </label>
                   <Field label="内推人 / 内推码" value={detail.referral} onCommit={(value) => void save({ referral: value })} />
                   <Field label="简历版本" value={detail.resumeVersion} onCommit={(value) => void save({ resumeVersion: value })} />
                   <label className="space-y-1.5 text-sm">
@@ -332,6 +396,49 @@ export function ApplicationDetailDrawer({
                   }}
                   className="w-full resize-y rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-slate-400"
                 />
+              </section>
+
+              <section className="border-t border-line pt-5">
+                {!confirmDelete ? (
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-sm font-semibold text-rose-700">删除岗位</h3>
+                      <p className="mt-1 text-xs text-muted">关联面试和 Timeline 将一并删除。</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDelete(true)}
+                      className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
+                    >
+                      删除岗位
+                    </button>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
+                    <div className="text-sm font-semibold text-rose-800">确认删除这个岗位？</div>
+                    <p className="mt-1 text-xs leading-5 text-rose-700">
+                      此操作无法撤销，关联的面试记录和 Timeline 也会被删除。
+                    </p>
+                    <div className="mt-3 flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDelete(false)}
+                        disabled={deleting}
+                        className="rounded-lg px-3 py-2 text-sm text-muted hover:bg-white/70"
+                      >
+                        取消
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void deleteApplication()}
+                        disabled={deleting}
+                        className="rounded-lg bg-rose-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+                      >
+                        {deleting ? '删除中…' : '确认删除'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </section>
             </div>
           </>

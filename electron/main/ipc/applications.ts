@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron'
 import {
   applicationPriorities,
+  applicationRecruitmentTypes,
   applicationStatuses,
   type ApplicationPatch,
   type CreateApplicationRequest
@@ -51,6 +52,18 @@ function sanitizePatch(value: unknown): ApplicationPatch {
     patch.status = input.status
   }
 
+  if ('recruitmentType' in input) {
+    if (
+      typeof input.recruitmentType !== 'string' ||
+      !applicationRecruitmentTypes.includes(
+        input.recruitmentType as (typeof applicationRecruitmentTypes)[number]
+      )
+    ) {
+      throw new Error('Invalid recruitment type.')
+    }
+    patch.recruitmentType = input.recruitmentType
+  }
+
   const nullableFields = [
     'stage',
     'nextAction',
@@ -85,6 +98,7 @@ function sanitizeCreateRequest(value: unknown): CreateApplicationRequest {
   const input = value as Record<string, unknown>
   const priority = input.priority ?? 'A'
   const status = input.status ?? '待投递'
+  const recruitmentType = input.recruitmentType ?? '校招'
 
   if (
     typeof priority !== 'string' ||
@@ -100,11 +114,21 @@ function sanitizeCreateRequest(value: unknown): CreateApplicationRequest {
     throw new Error('Invalid status.')
   }
 
+  if (
+    typeof recruitmentType !== 'string' ||
+    !applicationRecruitmentTypes.includes(
+      recruitmentType as (typeof applicationRecruitmentTypes)[number]
+    )
+  ) {
+    throw new Error('Invalid recruitment type.')
+  }
+
   return {
     companyName: requiredString(input.companyName, 'Company'),
     jobTitle: requiredString(input.jobTitle, 'Job title'),
     priority,
     status,
+    recruitmentType,
     direction: optionalString(input.direction, 'direction'),
     location: optionalString(input.location, 'location'),
     jobUrl: optionalString(input.jobUrl, 'jobUrl'),
@@ -143,5 +167,12 @@ export function registerApplicationIpc(): void {
       throw new Error('Invalid application id.')
     }
     return service().update(id, sanitizePatch(value))
+  })
+
+  ipcMain.handle('jobflow:applications:delete', (_event, id: unknown) => {
+    if (typeof id !== 'string' || !id) {
+      throw new Error('Invalid application id.')
+    }
+    service().delete(id)
   })
 }

@@ -54,6 +54,16 @@ function sanitizePatch(value: unknown): JobFlowSettingsPatch {
     patch.directions = input.directions as string[]
   }
 
+  if ('channels' in input) {
+    if (
+      !Array.isArray(input.channels) ||
+      input.channels.some((item) => typeof item !== 'string')
+    ) {
+      throw new Error('Invalid application channels.')
+    }
+    patch.channels = input.channels as string[]
+  }
+
   return patch
 }
 

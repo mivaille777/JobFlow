@@ -26,7 +26,8 @@ const jobflowApi = {
     create: (input: CreateApplicationRequest) =>
       ipcRenderer.invoke('jobflow:applications:create', input),
     update: (id: string, patch: ApplicationPatch) =>
-      ipcRenderer.invoke('jobflow:applications:update', id, patch)
+      ipcRenderer.invoke('jobflow:applications:update', id, patch),
+    delete: (id: string) => ipcRenderer.invoke('jobflow:applications:delete', id)
   },
   interviews: {
     list: () => ipcRenderer.invoke('jobflow:interviews:list'),

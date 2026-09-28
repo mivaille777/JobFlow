@@ -38,6 +38,7 @@ declare global {
         events: (id: string) => Promise<ApplicationEvent[]>
         create: (input: CreateApplicationRequest) => Promise<ApplicationDetail>
         update: (id: string, patch: ApplicationPatch) => Promise<ApplicationDetail>
+        delete: (id: string) => Promise<void>
       }
       interviews: {
         list: () => Promise<InterviewListItem[]>

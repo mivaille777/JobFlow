@@ -50,6 +50,7 @@ export class ApplicationService {
         companyId: company.id,
         jobTitle: input.jobTitle,
         direction: input.direction,
+        recruitmentType: input.recruitmentType,
         location: input.location,
         priority: input.priority,
         status: input.status,
@@ -74,6 +75,14 @@ export class ApplicationService {
     })
 
     return this.get(applicationId)
+  }
+
+  delete(id: string) {
+    runInTransaction(this.db, (transactionDb) => {
+      const applications = new ApplicationRepository(transactionDb)
+      if (!applications.getById(id)) throw new Error('Application not found.')
+      applications.delete(id)
+    })
   }
 
   update(id: string, patch: ApplicationPatch) {

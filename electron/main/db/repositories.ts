@@ -15,6 +15,7 @@ export interface CreateApplicationInput {
   companyId: string
   jobTitle: string
   direction?: string | null
+  recruitmentType?: string
   location?: string | null
   priority?: string
   status?: string
@@ -83,6 +84,7 @@ const applicationListSelection = {
   companyName: companies.name,
   jobTitle: applications.jobTitle,
   direction: applications.direction,
+  recruitmentType: applications.recruitmentType,
   location: applications.location,
   priority: applications.priority,
   status: applications.status,
@@ -149,6 +151,7 @@ export class ApplicationRepository {
       companyId: input.companyId,
       jobTitle: input.jobTitle,
       direction: input.direction ?? null,
+      recruitmentType: input.recruitmentType ?? '校招',
       location: input.location ?? null,
       priority: input.priority ?? 'A',
       status: input.status ?? '待投递',

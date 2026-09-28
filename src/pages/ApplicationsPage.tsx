@@ -4,6 +4,7 @@ import { applicationPriorityClass, applicationStatusClass } from '../app/present
 import { PageShell } from '../components/PageShell'
 import { showToast } from '../app/toast'
 import { ApplicationDetailDrawer } from '../features/applications/ApplicationDetailDrawer'
+import { ApplicationOptionsDialog } from '../features/applications/ApplicationOptionsDialog'
 import { KanbanBoard } from '../features/applications/KanbanBoard'
 import { QuickAddDialog } from '../features/applications/QuickAddDialog'
 import {
@@ -13,11 +14,13 @@ import {
 } from '../features/applications/applicationFilters'
 import {
   applicationPriorities,
+  applicationRecruitmentTypes,
   applicationStatuses,
   type ApplicationDetail,
   type ApplicationListItem,
   type ApplicationPatch
 } from '../shared/application'
+import type { JobFlowSettings } from '../shared/settings'
 
 const quickFilters: Array<{ value: QuickFilter; label: string }> = [
   { value: 'all', label: '全部' },
@@ -31,6 +34,7 @@ const initialFilters: ApplicationFilters = {
   search: '',
   status: '',
   direction: '',
+  recruitmentType: '',
   priority: '',
   channel: '',
   quick: 'all',
@@ -54,10 +58,13 @@ export function ApplicationsPage() {
   const [filters, setFilters] = useState<ApplicationFilters>(initialFilters)
   const [loading, setLoading] = useState(true)
   const [quickAddOpen, setQuickAddOpen] = useState(false)
+  const [optionsOpen, setOptionsOpen] = useState(false)
+  const [optionSettings, setOptionSettings] = useState<JobFlowSettings | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list')
 
   useEffect(() => {
+    void window.jobflow.settings.get().then(setOptionSettings).catch(() => undefined)
     void window.jobflow.applications
       .list()
       .then(setItems)
@@ -87,17 +94,23 @@ export function ApplicationsPage() {
   const directions = useMemo(
     () =>
       Array.from(
-        new Set(items.map((item) => item.direction).filter((value): value is string => Boolean(value)))
+        new Set([
+          ...(optionSettings?.directions ?? []),
+          ...items.map((item) => item.direction).filter((value): value is string => Boolean(value))
+        ])
       ).sort(),
-    [items]
+    [items, optionSettings]
   )
 
   const channels = useMemo(
     () =>
       Array.from(
-        new Set(items.map((item) => item.channel).filter((value): value is string => Boolean(value)))
+        new Set([
+          ...(optionSettings?.channels ?? []),
+          ...items.map((item) => item.channel).filter((value): value is string => Boolean(value))
+        ])
       ).sort(),
-    [items]
+    [items, optionSettings]
   )
 
   const visibleItems = useMemo(
@@ -182,6 +195,13 @@ export function ApplicationsPage() {
                 看板
               </button>
             </div>
+            <button
+              type="button"
+              onClick={() => setOptionsOpen(true)}
+              className="rounded-lg border border-line bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+            >
+              选项设置
+            </button>
             <div className="text-sm text-muted">
               {visibleItems.length} / {items.length} 个岗位
             </div>
@@ -195,7 +215,7 @@ export function ApplicationsPage() {
           </div>
         </div>
 
-        <div className="grid gap-3 xl:grid-cols-[minmax(220px,1fr)_150px_150px_110px_140px_140px]">
+        <div className="grid gap-3 xl:grid-cols-[minmax(220px,1fr)_135px_145px_105px_95px_130px_130px]">
           <input
             ref={searchInputRef}
             value={filters.search}
@@ -227,6 +247,18 @@ export function ApplicationsPage() {
             <option value="">全部方向</option>
             {directions.map((direction) => (
               <option key={direction} value={direction}>{direction}</option>
+            ))}
+          </select>
+          <select
+            value={filters.recruitmentType}
+            onChange={(event) =>
+              setFilters((current) => ({ ...current, recruitmentType: event.target.value }))
+            }
+            className="rounded-lg border border-line bg-white px-3 py-2 text-sm"
+          >
+            <option value="">全部类型</option>
+            {applicationRecruitmentTypes.map((type) => (
+              <option key={type} value={type}>{type}</option>
             ))}
           </select>
           <select
@@ -273,12 +305,13 @@ export function ApplicationsPage() {
         {viewMode === 'list' ? (
           <div className="overflow-hidden rounded-xl border border-line">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1050px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1160px] border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">优先级</th>
                   <th className="px-4 py-3 font-medium">公司 / 岗位</th>
                   <th className="px-4 py-3 font-medium">方向</th>
+                  <th className="px-4 py-3 font-medium">类型</th>
                   <th className="px-4 py-3 font-medium">状态</th>
                   <th className="px-4 py-3 font-medium">当前节点</th>
                   <th className="px-4 py-3 font-medium">下一步日期</th>
@@ -289,7 +322,7 @@ export function ApplicationsPage() {
               <tbody className="divide-y divide-line bg-white">
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-6">
+                    <td colSpan={9} className="px-4 py-6">
                       <div className="space-y-3" aria-label="正在读取投递数据">
                         {[0, 1, 2, 3].map((key) => (
                           <div
@@ -302,7 +335,7 @@ export function ApplicationsPage() {
                   </tr>
                 ) : visibleItems.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-14 text-center">
+                    <td colSpan={9} className="px-4 py-14 text-center">
                       <div className="font-medium text-slate-600">
                         {items.length === 0 ? '还没有投递记录' : '没有符合条件的岗位'}
                       </div>
@@ -351,6 +384,16 @@ export function ApplicationsPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-muted">{item.direction ?? '—'}</td>
+                      <td className="px-4 py-3">
+                        <span className={[
+                          'rounded-full px-2.5 py-1 text-xs font-medium',
+                          item.recruitmentType === '实习'
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : 'bg-violet-50 text-violet-700'
+                        ].join(' ')}>
+                          {item.recruitmentType}
+                        </span>
+                      </td>
                       <td className="px-4 py-3">
                         <select
                           aria-label={`${item.companyName} 状态`}
@@ -420,12 +463,23 @@ export function ApplicationsPage() {
         onCreated={handleCreated}
       />
 
+      <ApplicationOptionsDialog
+        open={optionsOpen}
+        onClose={() => setOptionsOpen(false)}
+        onChanged={setOptionSettings}
+      />
+
       <ApplicationDetailDrawer
         applicationId={selectedId}
         onClose={() => setSelectedId(null)}
         onUpdated={(updated) => {
           mergeDetail(updated)
           showToast('已更新')
+        }}
+        onDeleted={(applicationId) => {
+          setItems((current) => current.filter((item) => item.id !== applicationId))
+          setSelectedId(null)
+          showToast('岗位已删除')
         }}
       />
     </PageShell>

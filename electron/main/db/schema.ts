@@ -21,6 +21,7 @@ export const applications = sqliteTable(
       .references(() => companies.id, { onDelete: 'cascade' }),
     jobTitle: text('job_title').notNull(),
     direction: text('direction'),
+    recruitmentType: text('recruitment_type').notNull().default('校招'),
     location: text('location'),
     priority: text('priority').notNull().default('A'),
     status: text('status').notNull().default('待投递'),

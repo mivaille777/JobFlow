@@ -68,6 +68,25 @@ describe('ApplicationService timeline', () => {
     context.sqlite.close()
   })
 
+  it('deletes an application together with its timeline events', () => {
+    const { context, service } = setup()
+    const created = service.create({
+      companyName: 'Delete Labs',
+      jobTitle: 'Intern Agent',
+      recruitmentType: '实习'
+    })
+
+    expect(service.listEvents(created.id)).toHaveLength(1)
+    service.delete(created.id)
+
+    expect(() => service.get(created.id)).toThrow('Application not found.')
+    const eventCount = context.sqlite
+      .prepare('SELECT COUNT(*) AS count FROM application_events WHERE application_id = ?')
+      .get(created.id) as { count: number }
+    expect(eventCount.count).toBe(0)
+    context.sqlite.close()
+  })
+
   it('reuses an existing company for quick additions', () => {
     const { context, service } = setup()
 

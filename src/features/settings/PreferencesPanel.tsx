@@ -16,6 +16,7 @@ const themeLabels: Record<ThemePreference, string> = {
 export function PreferencesPanel() {
   const [settings, setSettings] = useState<JobFlowSettings | null>(null)
   const [newDirection, setNewDirection] = useState('')
+  const [newChannel, setNewChannel] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
@@ -82,6 +83,26 @@ export function PreferencesPanel() {
     if (!value || settings.directions.includes(value)) return
     await saveDirections([...settings.directions, value])
     setNewDirection('')
+  }
+
+  async function saveChannels(channels: string[]) {
+    if (!settings) return
+    setError('')
+    try {
+      const updated = await window.jobflow.settings.update({ channels })
+      setSettings(updated)
+      flash('投递渠道已更新')
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : '投递渠道更新失败。')
+    }
+  }
+
+  async function addChannel() {
+    if (!settings) return
+    const value = newChannel.trim()
+    if (!value || settings.channels.includes(value)) return
+    await saveChannels([...settings.channels, value])
+    setNewChannel('')
   }
 
   if (!settings) {
@@ -190,6 +211,58 @@ export function PreferencesPanel() {
             type="button"
             onClick={() => void addDirection()}
             disabled={!newDirection.trim()}
+            className="rounded-lg border border-line px-3 py-2 text-sm font-medium disabled:opacity-40"
+          >
+            添加
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-7 border-t border-line pt-6">
+        <div className="text-sm font-medium">投递渠道</div>
+        <p className="mt-1 text-xs text-muted">用于新增、编辑和筛选岗位，最多 20 个。</p>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {settings.channels.map((channel) => (
+            <span
+              key={channel}
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-slate-50 px-3 py-1.5 text-sm"
+            >
+              {channel}
+              {settings.channels.length > 1 && (
+                <button
+                  type="button"
+                  aria-label={`删除渠道 ${channel}`}
+                  onClick={() =>
+                    void saveChannels(settings.channels.filter((item) => item !== channel))
+                  }
+                  className="text-slate-400 hover:text-red-600"
+                >
+                  ×
+                </button>
+              )}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-4 flex max-w-md gap-2">
+          <input
+            value={newChannel}
+            maxLength={40}
+            placeholder="添加渠道，例如：公司招聘公众号"
+            onChange={(event) => setNewChannel(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                void addChannel()
+              }
+            }}
+            className="min-w-0 flex-1 rounded-lg border border-line bg-white px-3 py-2 text-sm"
+          />
+          <button
+            type="button"
+            onClick={() => void addChannel()}
+            disabled={!newChannel.trim()}
             className="rounded-lg border border-line px-3 py-2 text-sm font-medium disabled:opacity-40"
           >
             添加

@@ -154,3 +154,57 @@ test('V1 最终验收：新增 → 测评 → 面试复盘 → Kanban → Offer 
     rmSync(userDataDirectory, { recursive: true, force: true })
   }
 })
+
+
+test('投递选项自定义、校招/实习筛选与删除岗位', async () => {
+  const userDataDirectory = mkdtempSync(join(tmpdir(), 'jobflow-options-e2e-'))
+  const electronApp = await launchJobFlow(userDataDirectory)
+
+  try {
+    const page = await electronApp.firstWindow()
+    await page.getByRole('link', { name: '投递 Applications' }).click()
+
+    await page.getByRole('button', { name: '选项设置' }).click()
+    const optionsDialog = page.getByRole('dialog', { name: '投递选项设置' })
+
+    await optionsDialog.getByLabel('新增岗位方向').fill('Agent Infra')
+    await optionsDialog.getByRole('button', { name: '添加方向' }).click()
+    await expect(optionsDialog.getByText('Agent Infra', { exact: true })).toBeVisible()
+
+    await optionsDialog.getByLabel('新增投递渠道').fill('校园官网')
+    await optionsDialog.getByRole('button', { name: '添加渠道' }).click()
+    await expect(optionsDialog.getByText('校园官网', { exact: true })).toBeVisible()
+    await optionsDialog.getByRole('button', { name: '完成' }).click()
+
+    await page.getByRole('button', { name: '+ 新增岗位' }).first().click()
+    await page.getByLabel('公司 *').fill('Options Labs')
+    await page.getByLabel('岗位 *').fill('Intern Agent Engineer')
+    await page.getByLabel('岗位方向').selectOption('Agent Infra')
+    await page.getByLabel('招聘类型').selectOption('实习')
+    await page.getByRole('button', { name: '更多信息 ↓' }).click()
+    await page.getByLabel('投递渠道').selectOption('校园官网')
+    await page.getByRole('button', { name: '保存岗位' }).click()
+
+    const drawer = page.locator('aside').filter({ hasText: 'Intern Agent Engineer' })
+    await expect(drawer.getByLabel('招聘类型')).toHaveValue('实习')
+    await expect(drawer.getByLabel('岗位方向')).toHaveValue('Agent Infra')
+    await expect(drawer.getByLabel('投递渠道')).toHaveValue('校园官网')
+    await drawer.getByRole('button', { name: '关闭岗位详情' }).click()
+
+    const typeFilter = page.locator('select').filter({ has: page.locator('option[value="实习"]') }).first()
+    await typeFilter.selectOption('实习')
+    const row = page.getByRole('row').filter({ hasText: 'Options Labs' })
+    await expect(row).toBeVisible()
+    await expect(row.getByText('实习', { exact: true })).toBeVisible()
+
+    await row.click()
+    const deleteDrawer = page.locator('aside').filter({ hasText: 'Intern Agent Engineer' })
+    await deleteDrawer.getByRole('button', { name: '删除岗位' }).click()
+    await deleteDrawer.getByRole('button', { name: '确认删除' }).click()
+    await expect(page.getByText('岗位已删除', { exact: true })).toBeVisible()
+    await expect(page.getByRole('row').filter({ hasText: 'Options Labs' })).toHaveCount(0)
+  } finally {
+    await electronApp.close().catch(() => undefined)
+    rmSync(userDataDirectory, { recursive: true, force: true })
+  }
+})
