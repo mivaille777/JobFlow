@@ -1,3 +1,5 @@
+import type { ApplicationListItem, ApplicationPatch } from '../shared/application'
+
 export {}
 
 declare global {
@@ -5,6 +7,10 @@ declare global {
     jobflow: {
       app: {
         getVersion: () => Promise<string>
+      }
+      applications: {
+        list: () => Promise<ApplicationListItem[]>
+        update: (id: string, patch: ApplicationPatch) => Promise<ApplicationListItem>
       }
     }
   }

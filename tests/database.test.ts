@@ -59,16 +59,25 @@ describe('database', () => {
       jobTitle: 'AI Agent Engineer',
       direction: 'AI Agent',
       priority: 'S',
-      status: '已投递'
+      status: '已投递',
+      channel: '内推'
     })
 
     expect(applications.getById(application.id)?.jobTitle).toBe('AI Agent Engineer')
+
+    const listItem = applications.listWithCompany()[0]
+    expect(listItem).toMatchObject({
+      id: application.id,
+      companyName: 'JobFlow Labs',
+      channel: '内推'
+    })
 
     const updated = applications.update(application.id, {
       status: '面试中',
       stage: '一面待面'
     })
     expect(updated?.status).toBe('面试中')
+    expect(applications.getWithCompany(application.id)?.stage).toBe('一面待面')
 
     events.create({
       applicationId: application.id,
