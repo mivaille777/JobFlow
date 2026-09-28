@@ -16,6 +16,7 @@ test('新增岗位 → 投递 → 面试复盘 → Offer 主链路', async () =>
 
   try {
     const page = await electronApp.firstWindow()
+    console.log('E2E checkpoint: window-ready')
     await expect(page).toHaveTitle('JobFlow')
     await expect(page.getByText('JobFlow', { exact: true })).toBeVisible()
 
@@ -25,6 +26,7 @@ test('新增岗位 → 投递 → 面试复盘 → Offer 主链路', async () =>
     await page.getByLabel('公司 *').fill('E2E Labs')
     await page.getByLabel('岗位 *').fill('Agent Engineer')
     await page.getByRole('button', { name: '保存岗位' }).click()
+    console.log('E2E checkpoint: application-created')
 
     const applicationDrawer = page.locator('aside').filter({ hasText: 'Agent Engineer' })
     await expect(applicationDrawer.getByText('E2E Labs', { exact: true })).toBeVisible()
@@ -33,12 +35,14 @@ test('新增岗位 → 投递 → 面试复盘 → Offer 主链路', async () =>
     await applicationDrawer.getByLabel('当前节点').fill('简历筛选')
     await applicationDrawer.getByLabel('当前节点').press('Tab')
     await applicationDrawer.getByRole('button', { name: '关闭岗位详情' }).click()
+    console.log('E2E checkpoint: application-progressed')
 
     await page.getByRole('link', { name: '面试 Interviews' }).click()
     await page.getByRole('button', { name: '+ 添加面试' }).click()
     await page.getByLabel('岗位').selectOption({ label: 'E2E Labs · Agent Engineer' })
     await page.getByLabel('轮次').selectOption('一面')
     await page.getByRole('button', { name: '添加面试' }).click()
+    console.log('E2E checkpoint: interview-created')
 
     const interviewRow = page.getByRole('button', { name: /E2E Labs · Agent Engineer/ })
     await expect(interviewRow).toBeVisible()
@@ -52,13 +56,17 @@ test('新增岗位 → 投递 → 面试复盘 → Offer 主链路', async () =>
     await interviewDrawer.getByRole('button', { name: '保存复盘' }).click()
     await expect(interviewDrawer.getByRole('button', { name: '保存复盘' })).toBeEnabled()
     await interviewDrawer.getByRole('button', { name: '关闭' }).click()
+    console.log('E2E checkpoint: interview-reviewed')
 
     await page.getByRole('link', { name: /投递/ }).click()
     await page.getByLabel('E2E Labs 状态').selectOption('Offer阶段')
     await expect(page.getByLabel('E2E Labs 状态')).toHaveValue('Offer阶段')
     await expect(page.getByText('已更新', { exact: true })).toBeVisible()
+    console.log('E2E checkpoint: offer-complete')
   } finally {
+    console.log('E2E checkpoint: closing-electron')
     await electronApp.close()
+    console.log('E2E checkpoint: electron-closed')
     rmSync(userDataDirectory, { recursive: true, force: true })
   }
 })
