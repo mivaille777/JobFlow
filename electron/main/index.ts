@@ -9,6 +9,9 @@ import { registerTodayIpc } from './ipc/today'
 import { registerTransferIpc } from './ipc/transfer'
 import { desktopNotificationScheduler } from './services/notifications'
 
+const customUserDataDirectory = process.env.JOBFLOW_USER_DATA_DIR
+if (customUserDataDirectory) app.setPath('userData', customUserDataDirectory)
+
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1240,
