@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { navigationItems } from './app/navigation'
 import { applyThemePreference } from './app/theme'
+import { CommandPalette } from './components/CommandPalette'
 import { AnalyticsPage } from './pages/AnalyticsPage'
 import { ApplicationsPage } from './pages/ApplicationsPage'
 import { InterviewsPage } from './pages/InterviewsPage'
@@ -65,6 +66,7 @@ export default function App() {
           </Routes>
         </main>
       </div>
+      <CommandPalette />
     </div>
   )
 }
