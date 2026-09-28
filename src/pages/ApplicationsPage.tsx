@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PageShell } from '../components/PageShell'
 import { ApplicationDetailDrawer } from '../features/applications/ApplicationDetailDrawer'
+import { KanbanBoard } from '../features/applications/KanbanBoard'
 import { QuickAddDialog } from '../features/applications/QuickAddDialog'
 import {
   filterAndSortApplications,
@@ -60,6 +61,7 @@ export function ApplicationsPage() {
   const [toast, setToast] = useState('')
   const [quickAddOpen, setQuickAddOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list')
 
   useEffect(() => {
     void window.jobflow.applications
@@ -149,7 +151,29 @@ export function ApplicationsPage() {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex rounded-lg bg-slate-100 p-1 text-xs">
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                className={[
+                  'rounded-md px-3 py-1.5 transition',
+                  viewMode === 'list' ? 'bg-white font-medium text-ink shadow-sm' : 'text-muted'
+                ].join(' ')}
+              >
+                列表
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('kanban')}
+                className={[
+                  'rounded-md px-3 py-1.5 transition',
+                  viewMode === 'kanban' ? 'bg-white font-medium text-ink shadow-sm' : 'text-muted'
+                ].join(' ')}
+              >
+                看板
+              </button>
+            </div>
             <div className="text-sm text-muted">
               {visibleItems.length} / {items.length} 个岗位
             </div>
@@ -243,7 +267,8 @@ export function ApplicationsPage() {
           </div>
         ) : null}
 
-        <div className="overflow-hidden rounded-xl border border-line">
+        {viewMode === 'list' ? (
+          <div className="overflow-hidden rounded-xl border border-line">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1050px] border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
@@ -359,6 +384,15 @@ export function ApplicationsPage() {
             </table>
           </div>
         </div>
+        ) : (
+          <KanbanBoard
+            items={visibleItems}
+            onOpen={setSelectedId}
+            onStatusChange={async (id, status) => {
+              await patchApplication(id, { status })
+            }}
+          />
+        )}
       </div>
 
       <QuickAddDialog
