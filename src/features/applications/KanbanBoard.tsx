@@ -137,6 +137,9 @@ export function KanbanBoard({ items, onOpen, onStatusChange }: KanbanBoardProps)
   function handleDragEnd(event: DragEndEvent) {
     const draggedId = String(event.active.id)
     suppressOpenId.current = draggedId
+    window.setTimeout(() => {
+      if (suppressOpenId.current === draggedId) suppressOpenId.current = null
+    }, 750)
 
     setActiveId(null)
     const overId = event.over?.id
@@ -160,10 +163,7 @@ export function KanbanBoard({ items, onOpen, onStatusChange }: KanbanBoardProps)
               label={column.label}
               items={grouped[column.status]}
               onOpen={(id) => {
-                if (suppressOpenId.current === id) {
-                  suppressOpenId.current = null
-                  return
-                }
+                if (suppressOpenId.current === id) return
                 onOpen(id)
               }}
             />
