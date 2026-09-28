@@ -102,6 +102,7 @@ function KanbanColumn({
       </div>
       <div
         ref={droppable.setNodeRef}
+        aria-label={`${label} 看板列`}
         className={[
           'min-h-[420px] space-y-2.5 rounded-xl border border-line bg-slate-50/80 p-2.5 transition-colors duration-150 ease-out',
           droppable.isOver ? 'border-blue-300 bg-blue-50/60' : ''
