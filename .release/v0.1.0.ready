@@ -1,3 +1,4 @@
 version=v0.1.0
 source=Prototype
 prepared_at=2026-09-28
+security_gate=react-router-dom-6.30.6
