@@ -3,6 +3,7 @@ import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { navigationItems } from './app/navigation'
 import { applyThemePreference } from './app/theme'
 import { CommandPalette } from './components/CommandPalette'
+import { ToastViewport } from './components/ToastViewport'
 import { AnalyticsPage } from './pages/AnalyticsPage'
 import { ApplicationsPage } from './pages/ApplicationsPage'
 import { InterviewsPage } from './pages/InterviewsPage'
@@ -42,7 +43,7 @@ export default function App() {
                 end={item.path === '/'}
                 className={({ isActive }) =>
                   [
-                    'flex items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors',
+                    'flex items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors duration-150 ease-out',
                     isActive
                       ? 'bg-slate-100 font-medium text-ink'
                       : 'text-muted hover:bg-slate-50 hover:text-ink'
@@ -67,6 +68,7 @@ export default function App() {
         </main>
       </div>
       <CommandPalette />
+      <ToastViewport />
     </div>
   )
 }
