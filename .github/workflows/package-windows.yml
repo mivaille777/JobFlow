@@ -1,0 +1,61 @@
+name: JobFlow Windows Package
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - Prototype
+      - ci/stage-16
+      - ci/stage-17
+
+permissions:
+  contents: read
+
+jobs:
+  package-windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit and integration tests
+        run: npm run test
+
+      - name: Build Windows installer
+        run: npm run dist:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Verify installer
+        shell: pwsh
+        run: |
+          $installer = Join-Path $PWD 'release\JobFlow Setup.exe'
+          if (-not (Test-Path $installer)) {
+            throw "Expected installer not found: $installer"
+          }
+          $size = (Get-Item $installer).Length
+          if ($size -le 0) {
+            throw "Installer is empty."
+          }
+          Write-Host "Installer verified: $installer ($size bytes)"
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: JobFlow-Windows-Installer
+          path: release/JobFlow Setup.exe
+          if-no-files-found: error
+          retention-days: 14
