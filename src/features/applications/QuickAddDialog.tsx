@@ -3,8 +3,10 @@ import {
   applicationPriorities,
   applicationStatuses,
   type ApplicationDetail,
+  type ApplicationPriority,
   type CreateApplicationRequest
 } from '../../shared/application'
+import { defaultJobDirections } from '../../shared/settings'
 
 interface QuickAddDialogProps {
   open: boolean
@@ -14,11 +16,14 @@ interface QuickAddDialogProps {
 
 const today = () => new Date().toISOString().slice(0, 10)
 
-const initialForm = (): CreateApplicationRequest => ({
+const initialForm = (
+  defaultPriority: ApplicationPriority = 'A',
+  direction = defaultJobDirections[0]
+): CreateApplicationRequest => ({
   companyName: '',
   jobTitle: '',
-  direction: 'AI Agent',
-  priority: 'A',
+  direction,
+  priority: defaultPriority,
   status: '待投递',
   jobUrl: '',
   location: '',
@@ -32,17 +37,37 @@ const initialForm = (): CreateApplicationRequest => ({
 
 export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps) {
   const [form, setForm] = useState<CreateApplicationRequest>(initialForm)
+  const [directions, setDirections] = useState<string[]>([...defaultJobDirections])
+  const [defaultPriority, setDefaultPriority] = useState<ApplicationPriority>('A')
   const [advanced, setAdvanced] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
     if (!open) return
+
+    let cancelled = false
+    void window.jobflow.settings
+      .get()
+      .then((settings) => {
+        if (cancelled) return
+        setDirections(settings.directions)
+        setDefaultPriority(settings.defaultPriority)
+        setForm(initialForm(settings.defaultPriority, settings.directions[0]))
+      })
+      .catch(() => {
+        if (!cancelled) setForm(initialForm())
+      })
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+
+    return () => {
+      cancelled = true
+      window.removeEventListener('keydown', onKeyDown)
+    }
   }, [open, onClose])
 
   if (!open) return null
@@ -66,7 +91,7 @@ export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps
     try {
       const created = await window.jobflow.applications.create(form)
       onCreated(created)
-      setForm(initialForm())
+      setForm(initialForm(defaultPriority, directions[0]))
       setAdvanced(false)
       onClose()
     } catch {
@@ -124,11 +149,15 @@ export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps
           <div className="grid gap-4 sm:grid-cols-3">
             <label className="space-y-1.5 text-sm">
               <span className="font-medium">岗位方向</span>
-              <input
+              <select
                 value={form.direction ?? ''}
                 onChange={(event) => update('direction', event.target.value)}
-                className="w-full rounded-lg border border-line px-3 py-2"
-              />
+                className="w-full rounded-lg border border-line bg-white px-3 py-2"
+              >
+                {directions.map((direction) => (
+                  <option key={direction} value={direction}>{direction}</option>
+                ))}
+              </select>
             </label>
             <label className="space-y-1.5 text-sm">
               <span className="font-medium">优先级</span>
