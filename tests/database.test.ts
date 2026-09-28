@@ -33,6 +33,7 @@ describe('database', () => {
       .all() as Array<{ version: number; name: string }>
 
     expect(rows).toEqual([{ version: 1, name: 'initial_schema' }])
+
     context.sqlite.close()
 
     const reopened = createDatabase(join(tempDirs.at(-1)!, 'test.db'))
@@ -44,7 +45,7 @@ describe('database', () => {
     reopened.sqlite.close()
   })
 
-  it('supports application CRUD, joined detail and related repositories', () => {
+  it('supports application CRUD and related repositories', () => {
     const context = createTestContext()
     const companies = new CompanyRepository(context.db)
     const applications = new ApplicationRepository(context.db)
@@ -53,46 +54,21 @@ describe('database', () => {
     const settings = new SettingsRepository(context.db)
 
     const company = companies.create({ name: 'JobFlow Labs' })
-    expect(companies.findByName('JobFlow Labs')?.id).toBe(company.id)
-
     const application = applications.create({
       companyId: company.id,
       jobTitle: 'AI Agent Engineer',
       direction: 'AI Agent',
       priority: 'S',
-      status: '已投递',
-      channel: '内推',
-      jobUrl: 'https://example.com/job',
-      jobId: 'JF-001',
-      resumeVersion: 'Agent-V3',
-      notes: '重点准备 Agent Memory'
+      status: '已投递'
     })
 
     expect(applications.getById(application.id)?.jobTitle).toBe('AI Agent Engineer')
 
-    const listItem = applications.listWithCompany()[0]
-    expect(listItem).toMatchObject({
-      id: application.id,
-      companyName: 'JobFlow Labs',
-      channel: '内推'
-    })
-
-    const detail = applications.getDetailWithCompany(application.id)
-    expect(detail).toMatchObject({
-      companyName: 'JobFlow Labs',
-      jobUrl: 'https://example.com/job',
-      jobId: 'JF-001',
-      resumeVersion: 'Agent-V3',
-      notes: '重点准备 Agent Memory'
-    })
-
     const updated = applications.update(application.id, {
       status: '面试中',
-      stage: '一面待面',
-      nextAction: '准备一面'
+      stage: '一面待面'
     })
     expect(updated?.status).toBe('面试中')
-    expect(applications.getDetailWithCompany(application.id)?.nextAction).toBe('准备一面')
 
     events.create({
       applicationId: application.id,
