@@ -1,8 +1,10 @@
 appId: com.mivaille777.jobflow
 productName: JobFlow
+copyright: Copyright © 2026 mivaille777
 
 directories:
   output: release
+  buildResources: build
 
 files:
   - out/**/*
@@ -11,6 +13,8 @@ files:
 asar: true
 
 win:
+  icon: build/icon.svg
+  executableName: JobFlow
   target:
     - target: nsis
       arch:
@@ -24,4 +28,4 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: JobFlow
-  artifactName: JobFlow Setup.${ext}
+  artifactName: JobFlow-${version}-Setup.${ext}
