@@ -51,5 +51,12 @@
     "vitest": "3.2.4",
     "@playwright/test": "1.55.0",
     "electron-builder": "26.16.1"
-  }
+  },
+  "productName": "JobFlow",
+  "author": "mivaille777",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mivaille777/JobFlow.git"
+  },
+  "homepage": "https://github.com/mivaille777/JobFlow"
 }
