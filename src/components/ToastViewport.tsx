@@ -1,26 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
-
-export type ToastTone = 'success' | 'error' | 'info'
+import {
+  TOAST_EVENT,
+  type ToastEventDetail,
+  type ToastTone
+} from '../app/toast'
 
 interface ToastState {
   id: number
   message: string
   tone: ToastTone
-}
-
-interface ToastEventDetail {
-  message: string
-  tone: ToastTone
-}
-
-const TOAST_EVENT = 'jobflow:toast'
-
-export function showToast(message: string, tone: ToastTone = 'success'): void {
-  window.dispatchEvent(
-    new CustomEvent<ToastEventDetail>(TOAST_EVENT, {
-      detail: { message, tone }
-    })
-  )
 }
 
 export function ToastViewport() {
