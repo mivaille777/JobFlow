@@ -113,9 +113,12 @@ test('V1 最终验收：新增 → 测评 → 面试复盘 → Kanban → Offer 
     console.log('E2E checkpoint: kanban-interview')
 
     await page.getByRole('button', { name: '列表', exact: true }).click()
-    await expect(page.getByLabel('E2E Labs 状态')).toHaveValue('面试中')
-    await page.getByLabel('E2E Labs 状态').selectOption('Offer阶段')
-    await expect(page.getByLabel('E2E Labs 状态')).toHaveValue('Offer阶段')
+    const applicationRow = page.getByRole('row').filter({ hasText: 'E2E Labs' })
+    await expect(applicationRow).toBeVisible()
+    const statusSelect = applicationRow.getByLabel('E2E Labs 状态')
+    await expect(statusSelect).toHaveValue('面试中')
+    await statusSelect.selectOption('Offer阶段')
+    await expect(statusSelect).toHaveValue('Offer阶段')
     console.log('E2E checkpoint: offer-complete')
 
     await page.getByRole('row').filter({ hasText: 'E2E Labs' }).click()
