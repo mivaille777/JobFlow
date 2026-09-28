@@ -4,6 +4,7 @@ import { initializeAppDatabase } from './db'
 import { registerAnalyticsIpc } from './ipc/analytics'
 import { registerApplicationIpc } from './ipc/applications'
 import { registerInterviewIpc } from './ipc/interviews'
+import { registerSettingsIpc } from './ipc/settings'
 import { registerTodayIpc } from './ipc/today'
 import { registerTransferIpc } from './ipc/transfer'
 
@@ -42,6 +43,7 @@ app.whenReady().then(() => {
   registerAnalyticsIpc()
   registerApplicationIpc()
   registerInterviewIpc()
+  registerSettingsIpc()
   registerTodayIpc()
   registerTransferIpc()
 
@@ -49,14 +51,10 @@ app.whenReady().then(() => {
   createWindow()
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
-    }
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  if (process.platform !== 'darwin') app.quit()
 })
