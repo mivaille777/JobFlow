@@ -85,17 +85,47 @@ jobs:
           $installer = Get-ChildItem -Path (Join-Path $PWD 'release') -Filter 'JobFlow-0.1.0-Setup.exe' | Select-Object -First 1
           gh release create 'v0.1.0' $installer.FullName --target $env:GITHUB_SHA --title 'JobFlow v0.1.0' --notes-file 'RELEASE_NOTES_v0.1.0.md'
 
+      - name: Archive diverged early stage branches
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          foreach ($stage in 0..10) {
+            $sourceRef = "repos/$env:GITHUB_REPOSITORY/git/ref/heads/ci/stage-$stage"
+            $sha = gh api $sourceRef --jq '.object.sha'
+            if (-not $sha) {
+              throw "Could not resolve ci/stage-$stage."
+            }
+
+            $archiveApi = "repos/$env:GITHUB_REPOSITORY/git/ref/heads/archive/stage-$stage"
+            $archiveExists = $true
+            try {
+              gh api $archiveApi --silent
+            } catch {
+              $archiveExists = $false
+            }
+
+            if (-not $archiveExists) {
+              gh api -X POST "repos/$env:GITHUB_REPOSITORY/git/refs" -f ref="refs/heads/archive/stage-$stage" -f sha="$sha"
+              Write-Host "Archived ci/stage-$stage as archive/stage-$stage"
+            } else {
+              Write-Host "archive/stage-$stage already exists"
+            }
+
+            gh api -X DELETE "repos/$env:GITHUB_REPOSITORY/git/refs/heads/ci/stage-$stage"
+            Write-Host "Deleted ci/stage-$stage"
+          }
+
       - name: Cleanup merged stage branches
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           foreach ($stage in 11..17) {
-            $ref = "repos/$env:GITHUB_REPOSITORY/git/refs/heads/ci/stage-$stage"
             try {
-              gh api -X DELETE $ref
+              gh api -X DELETE "repos/$env:GITHUB_REPOSITORY/git/refs/heads/ci/stage-$stage"
               Write-Host "Deleted ci/stage-$stage"
             } catch {
-              Write-Host "ci/stage-$stage was already absent or could not be deleted: $($_.Exception.Message)"
+              Write-Host "ci/stage-$stage was already absent: $($_.Exception.Message)"
             }
           }
