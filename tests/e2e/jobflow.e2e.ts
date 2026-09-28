@@ -110,6 +110,7 @@ test('V1 最终验收：新增 → 测评 → 面试复盘 → Kanban → Offer 
     await expect(card).toBeVisible()
     await dragWithPointer(page, card, interviewLane)
     await expect(interviewLane.getByText('E2E Labs', { exact: true })).toBeVisible()
+    await expect(page.getByText('已更新', { exact: true })).toBeVisible()
     console.log('E2E checkpoint: kanban-interview')
 
     await page.getByRole('button', { name: '列表', exact: true }).click()
