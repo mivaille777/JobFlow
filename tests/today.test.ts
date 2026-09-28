@@ -13,6 +13,7 @@ function application(
     companyName: `Company ${id}`,
     jobTitle: `Role ${id}`,
     direction: 'AI Agent',
+    recruitmentType: '校招',
     location: null,
     priority: 'A',
     status: '已投递',

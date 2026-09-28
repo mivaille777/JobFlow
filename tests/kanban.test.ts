@@ -12,6 +12,7 @@ function application(id: string, status: string): ApplicationListItem {
     companyName: `Company ${id}`,
     jobTitle: 'AI Engineer',
     direction: 'AI Agent',
+    recruitmentType: '校招',
     location: null,
     priority: 'A',
     status,
