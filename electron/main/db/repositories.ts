@@ -57,6 +57,24 @@ export class CompanyRepository {
   }
 }
 
+const applicationListSelection = {
+  id: applications.id,
+  companyId: applications.companyId,
+  companyName: companies.name,
+  jobTitle: applications.jobTitle,
+  direction: applications.direction,
+  location: applications.location,
+  priority: applications.priority,
+  status: applications.status,
+  stage: applications.stage,
+  channel: applications.channel,
+  nextAction: applications.nextAction,
+  nextActionDate: applications.nextActionDate,
+  applicationDate: applications.applicationDate,
+  lastProgressAt: applications.lastProgressAt,
+  updatedAt: applications.updatedAt
+}
+
 export class ApplicationRepository {
   constructor(private readonly db: JobFlowDatabase) {}
 
@@ -96,22 +114,7 @@ export class ApplicationRepository {
 
   getWithCompany(id: string) {
     return this.db
-      .select({
-        id: applications.id,
-        companyId: applications.companyId,
-        companyName: companies.name,
-        jobTitle: applications.jobTitle,
-        direction: applications.direction,
-        location: applications.location,
-        priority: applications.priority,
-        status: applications.status,
-        stage: applications.stage,
-        nextAction: applications.nextAction,
-        nextActionDate: applications.nextActionDate,
-        applicationDate: applications.applicationDate,
-        lastProgressAt: applications.lastProgressAt,
-        updatedAt: applications.updatedAt
-      })
+      .select(applicationListSelection)
       .from(applications)
       .innerJoin(companies, eq(applications.companyId, companies.id))
       .where(eq(applications.id, id))
@@ -124,22 +127,7 @@ export class ApplicationRepository {
 
   listWithCompany() {
     return this.db
-      .select({
-        id: applications.id,
-        companyId: applications.companyId,
-        companyName: companies.name,
-        jobTitle: applications.jobTitle,
-        direction: applications.direction,
-        location: applications.location,
-        priority: applications.priority,
-        status: applications.status,
-        stage: applications.stage,
-        nextAction: applications.nextAction,
-        nextActionDate: applications.nextActionDate,
-        applicationDate: applications.applicationDate,
-        lastProgressAt: applications.lastProgressAt,
-        updatedAt: applications.updatedAt
-      })
+      .select(applicationListSelection)
       .from(applications)
       .innerJoin(companies, eq(applications.companyId, companies.id))
       .orderBy(desc(applications.updatedAt))
