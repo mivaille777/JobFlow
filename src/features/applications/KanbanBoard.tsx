@@ -9,7 +9,7 @@ import {
   type DragEndEvent,
   type DragStartEvent
 } from '@dnd-kit/core'
-import { useMemo, useState, type CSSProperties } from 'react'
+import { useMemo, useRef, useState, type CSSProperties } from 'react'
 import { applicationPriorityClass } from '../../app/presentation'
 import type { ApplicationListItem } from '../../shared/application'
 import { groupApplicationsByKanbanColumn, kanbanColumns } from './kanban'
@@ -127,6 +127,7 @@ export function KanbanBoard({ items, onOpen, onStatusChange }: KanbanBoardProps)
   )
   const grouped = useMemo(() => groupApplicationsByKanbanColumn(items), [items])
   const [activeId, setActiveId] = useState<string | null>(null)
+  const suppressOpenId = useRef<string | null>(null)
   const activeItem = items.find((item) => item.id === activeId) ?? null
 
   function handleDragStart(event: DragStartEvent) {
@@ -134,12 +135,18 @@ export function KanbanBoard({ items, onOpen, onStatusChange }: KanbanBoardProps)
   }
 
   function handleDragEnd(event: DragEndEvent) {
+    const draggedId = String(event.active.id)
+    suppressOpenId.current = draggedId
+    window.setTimeout(() => {
+      if (suppressOpenId.current === draggedId) suppressOpenId.current = null
+    }, 150)
+
     setActiveId(null)
     const overId = event.over?.id
     if (!overId || typeof overId !== 'string' || !overId.startsWith('lane:')) return
 
     const status = overId.slice('lane:'.length)
-    const item = items.find((candidate) => candidate.id === String(event.active.id))
+    const item = items.find((candidate) => candidate.id === draggedId)
     if (!item || item.status === status) return
 
     void onStatusChange(item.id, status)
@@ -155,7 +162,10 @@ export function KanbanBoard({ items, onOpen, onStatusChange }: KanbanBoardProps)
               status={column.status}
               label={column.label}
               items={grouped[column.status]}
-              onOpen={onOpen}
+              onOpen={(id) => {
+                if (suppressOpenId.current === id) return
+                onOpen(id)
+              }}
             />
           ))}
         </div>
