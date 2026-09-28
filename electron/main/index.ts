@@ -7,6 +7,7 @@ import { registerInterviewIpc } from './ipc/interviews'
 import { registerSettingsIpc } from './ipc/settings'
 import { registerTodayIpc } from './ipc/today'
 import { registerTransferIpc } from './ipc/transfer'
+import { desktopNotificationScheduler } from './services/notifications'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -49,10 +50,15 @@ app.whenReady().then(() => {
 
   ipcMain.handle('jobflow:app-version', () => app.getVersion())
   createWindow()
+  desktopNotificationScheduler.refresh()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+app.on('before-quit', () => {
+  desktopNotificationScheduler.stop()
 })
 
 app.on('window-all-closed', () => {
