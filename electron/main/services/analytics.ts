@@ -1,10 +1,6 @@
 import type { AnalyticsDashboardData } from '../../../src/shared/analytics'
+import { AnalyticsRepository } from '../db/analyticsRepository'
 import type { JobFlowDatabase } from '../db/client'
-import {
-  ApplicationRepository,
-  EventRepository,
-  InterviewRepository
-} from '../db/repositories'
 
 interface AnalyticsApplication {
   id: string
@@ -176,21 +172,17 @@ export function buildAnalyticsDashboard(
 }
 
 export class AnalyticsService {
-  private readonly applications: ApplicationRepository
-  private readonly interviews: InterviewRepository
-  private readonly events: EventRepository
+  private readonly repository: AnalyticsRepository
 
   constructor(db: JobFlowDatabase) {
-    this.applications = new ApplicationRepository(db)
-    this.interviews = new InterviewRepository(db)
-    this.events = new EventRepository(db)
+    this.repository = new AnalyticsRepository(db)
   }
 
   getDashboard(): AnalyticsDashboardData {
     return buildAnalyticsDashboard(
-      this.applications.listForAnalytics(),
-      this.interviews.listForAnalytics(),
-      this.events.listForAnalytics()
+      this.repository.applications(),
+      this.repository.interviews(),
+      this.repository.events()
     )
   }
 }
