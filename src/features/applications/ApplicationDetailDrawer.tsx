@@ -165,7 +165,12 @@ export function ApplicationDetailDrawer({
                     ) : null}
                   </div>
                 </div>
-                <button type="button" onClick={onClose} className="text-2xl text-slate-400 hover:text-ink">
+                <button
+                  type="button"
+                  aria-label="关闭岗位详情"
+                  onClick={onClose}
+                  className="text-2xl text-slate-400 hover:text-ink"
+                >
                   ×
                 </button>
               </div>
