@@ -83,37 +83,45 @@ export function ApplicationOptionsDialog({
         </header>
 
         <div className="grid gap-6 px-6 py-5 md:grid-cols-2">
-          <OptionGroup
-            title="岗位方向"
-            description="最多 20 个，每项不超过 40 个字符。"
-            values={settings?.directions ?? []}
-            newValue={newDirection}
-            inputLabel="新增岗位方向"
-            inputPlaceholder="例如：具身智能"
-            addLabel="添加方向"
-            onNewValue={setNewDirection}
-            onAdd={() => void addDirection()}
-            onRemove={(value) => {
-              if (!settings || settings.directions.length <= 1) return
-              void update({ directions: settings.directions.filter((item) => item !== value) })
-            }}
-          />
+          {settings ? (
+            <>
+              <OptionGroup
+                title="岗位方向"
+                description="最多 20 个，每项不超过 40 个字符。"
+                values={settings.directions}
+                newValue={newDirection}
+                inputLabel="新增岗位方向"
+                inputPlaceholder="例如：具身智能"
+                addLabel="添加方向"
+                onNewValue={setNewDirection}
+                onAdd={() => void addDirection()}
+                onRemove={(value) => {
+                  if (settings.directions.length <= 1) return
+                  void update({ directions: settings.directions.filter((item) => item !== value) })
+                }}
+              />
 
-          <OptionGroup
-            title="投递渠道"
-            description="例如官网、内推、牛客、招聘公众号。"
-            values={settings?.channels ?? []}
-            newValue={newChannel}
-            inputLabel="新增投递渠道"
-            inputPlaceholder="例如：校园官网"
-            addLabel="添加渠道"
-            onNewValue={setNewChannel}
-            onAdd={() => void addChannel()}
-            onRemove={(value) => {
-              if (!settings || settings.channels.length <= 1) return
-              void update({ channels: settings.channels.filter((item) => item !== value) })
-            }}
-          />
+              <OptionGroup
+                title="投递渠道"
+                description="例如官网、内推、牛客、招聘公众号。"
+                values={settings.channels}
+                newValue={newChannel}
+                inputLabel="新增投递渠道"
+                inputPlaceholder="例如：校园官网"
+                addLabel="添加渠道"
+                onNewValue={setNewChannel}
+                onAdd={() => void addChannel()}
+                onRemove={(value) => {
+                  if (settings.channels.length <= 1) return
+                  void update({ channels: settings.channels.filter((item) => item !== value) })
+                }}
+              />
+            </>
+          ) : (
+            <div className="md:col-span-2 rounded-xl border border-line bg-slate-50 px-4 py-10 text-center text-sm text-muted">
+              正在读取投递选项…
+            </div>
+          )}
         </div>
 
         {error ? (
