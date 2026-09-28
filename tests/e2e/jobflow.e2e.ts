@@ -19,22 +19,22 @@ test('新增岗位 → 投递 → 面试复盘 → Offer 主链路', async () =>
     await expect(page).toHaveTitle('JobFlow')
     await expect(page.getByText('JobFlow', { exact: true })).toBeVisible()
 
-    await page.getByRole('link', { name: /投递/ }).click()
+    await page.getByRole('link', { name: '投递 Applications' }).click()
     await page.getByRole('button', { name: '+ 新增岗位' }).click()
 
     await page.getByLabel('公司 *').fill('E2E Labs')
     await page.getByLabel('岗位 *').fill('Agent Engineer')
     await page.getByRole('button', { name: '保存岗位' }).click()
 
-    await expect(page.getByText('E2E Labs', { exact: true })).toBeVisible()
     const applicationDrawer = page.locator('aside').filter({ hasText: 'Agent Engineer' })
+    await expect(applicationDrawer.getByText('E2E Labs', { exact: true })).toBeVisible()
     await applicationDrawer.getByLabel('状态').selectOption('已投递')
     await expect(page.getByText('已更新', { exact: true })).toBeVisible()
     await applicationDrawer.getByLabel('当前节点').fill('简历筛选')
     await applicationDrawer.getByLabel('当前节点').press('Tab')
     await applicationDrawer.getByRole('button', { name: '关闭岗位详情' }).click()
 
-    await page.getByRole('link', { name: /面试/ }).click()
+    await page.getByRole('link', { name: '面试 Interviews' }).click()
     await page.getByRole('button', { name: '+ 添加面试' }).click()
     await page.getByLabel('岗位').selectOption({ label: 'E2E Labs · Agent Engineer' })
     await page.getByLabel('轮次').selectOption('一面')
