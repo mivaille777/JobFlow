@@ -113,17 +113,18 @@ test('V1 最终验收：新增 → 测评 → 面试复盘 → Kanban → Offer 
     await expect(page.getByText('已更新', { exact: true })).toBeVisible()
     console.log('E2E checkpoint: kanban-interview')
 
-    await page.getByRole('button', { name: '列表', exact: true }).click()
-    const applicationRow = page.getByRole('row').filter({ hasText: 'E2E Labs' })
-    await expect(applicationRow).toBeVisible()
-    const statusSelect = applicationRow.getByLabel('E2E Labs 状态')
-    await expect(statusSelect).toHaveValue('面试中')
-    await statusSelect.selectOption('Offer阶段')
-    await expect(statusSelect).toHaveValue('Offer阶段')
+    await page.waitForTimeout(800)
+    const movedCard = interviewLane.locator('article').filter({ hasText: 'E2E Labs' })
+    await movedCard.click()
+
+    const finalDrawer = page.locator('aside').filter({ hasText: 'Agent Engineer' })
+    const finalStatus = finalDrawer.getByLabel('状态')
+    await expect(finalStatus).toHaveValue('面试中')
+    await finalStatus.selectOption('Offer阶段')
+    await expect(finalStatus).toHaveValue('Offer阶段')
+    await expect(page.getByText('已更新', { exact: true })).toBeVisible()
     console.log('E2E checkpoint: offer-complete')
 
-    await page.getByRole('row').filter({ hasText: 'E2E Labs' }).click()
-    const finalDrawer = page.locator('aside').filter({ hasText: 'Agent Engineer' })
     await expect(
       finalDrawer.getByText('测评/笔试 → 面试中', { exact: true })
     ).toBeVisible()
