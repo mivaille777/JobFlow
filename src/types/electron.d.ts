@@ -5,6 +5,7 @@ import type {
   ApplicationPatch,
   CreateApplicationRequest
 } from '../shared/application'
+import type { TodayDashboardData } from '../shared/today'
 
 export {}
 
@@ -13,6 +14,9 @@ declare global {
     jobflow: {
       app: {
         getVersion: () => Promise<string>
+      }
+      today: {
+        get: () => Promise<TodayDashboardData>
       }
       applications: {
         list: () => Promise<ApplicationListItem[]>
