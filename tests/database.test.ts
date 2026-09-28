@@ -50,7 +50,7 @@ describe('database', () => {
       .prepare('SELECT COUNT(*) AS count FROM schema_migrations')
       .get() as { count: number }
 
-    expect(count.count).toBe(2)
+    expect(count.count).toBe(3)
     reopened.sqlite.close()
   })
 
