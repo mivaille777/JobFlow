@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PreferencesPanel } from '../features/settings/PreferencesPanel'
 import type { ExcelImportPreview } from '../shared/transfer'
 
 export function SettingsPage() {
@@ -94,7 +95,7 @@ export function SettingsPage() {
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Settings</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight">设置</h1>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-        当前阶段先提供数据迁移与本地备份；主题和个性化配置将在下一阶段补齐。
+        管理外观、岗位录入偏好和本地数据。Workflow 状态保持系统固定，保证统计口径稳定。
       </p>
 
       {(message || error) && (
@@ -110,7 +111,11 @@ export function SettingsPage() {
         </div>
       )}
 
-      <div className="mt-7 grid gap-5 lg:grid-cols-2">
+      <div className="mt-7">
+        <PreferencesPanel />
+      </div>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <section className="rounded-2xl border border-line bg-white p-6 shadow-panel">
           <div>
             <h2 className="text-base font-semibold">Excel 数据迁移</h2>
