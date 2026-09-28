@@ -1,3 +1,4 @@
+import type { AnalyticsDashboardData } from '../shared/analytics'
 import type {
   ApplicationDetail,
   ApplicationEvent,
@@ -20,6 +21,9 @@ declare global {
     jobflow: {
       app: {
         getVersion: () => Promise<string>
+      }
+      analytics: {
+        get: () => Promise<AnalyticsDashboardData>
       }
       today: {
         get: () => Promise<TodayDashboardData>
