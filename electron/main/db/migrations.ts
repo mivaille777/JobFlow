@@ -88,6 +88,13 @@ const migrations: Migration[] = [
         updated_at TEXT NOT NULL
       );
     `
+  },
+  {
+    version: 2,
+    name: 'add_application_batch',
+    sql: `
+      ALTER TABLE applications ADD COLUMN batch TEXT;
+    `
   }
 ]
 
