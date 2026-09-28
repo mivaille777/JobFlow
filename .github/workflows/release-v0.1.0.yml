@@ -1,0 +1,101 @@
+name: Release v0.1.0
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - Prototype
+    paths:
+      - '.release/v0.1.0.ready'
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit and integration tests
+        run: npm run test
+
+      - name: Production build
+        run: npm run build
+
+      - name: Electron E2E
+        run: xvfb-run -a npm run test:e2e
+
+  release-windows:
+    needs: verify
+    runs-on: windows-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Windows installer
+        run: npm run dist:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Verify installer
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem -Path (Join-Path $PWD 'release') -Filter 'JobFlow-0.1.0-Setup.exe' | Select-Object -First 1
+          if (-not $installer) {
+            throw 'JobFlow-0.1.0-Setup.exe was not produced.'
+          }
+          if ($installer.Length -le 0) {
+            throw 'Installer is empty.'
+          }
+          Write-Host "Release installer verified: $($installer.FullName) ($($installer.Length) bytes)"
+
+      - name: Create GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $installer = Get-ChildItem -Path (Join-Path $PWD 'release') -Filter 'JobFlow-0.1.0-Setup.exe' | Select-Object -First 1
+          gh release create 'v0.1.0' $installer.FullName --target $env:GITHUB_SHA --title 'JobFlow v0.1.0' --notes-file 'RELEASE_NOTES_v0.1.0.md'
+
+      - name: Cleanup merged stage branches
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          foreach ($stage in 11..17) {
+            $ref = "repos/$env:GITHUB_REPOSITORY/git/refs/heads/ci/stage-$stage"
+            try {
+              gh api -X DELETE $ref
+              Write-Host "Deleted ci/stage-$stage"
+            } catch {
+              Write-Host "ci/stage-$stage was already absent or could not be deleted: $($_.Exception.Message)"
+            }
+          }
