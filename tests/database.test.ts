@@ -34,7 +34,8 @@ describe('database', () => {
 
     expect(rows).toEqual([
       { version: 1, name: 'initial_schema' },
-      { version: 2, name: 'add_application_batch' }
+      { version: 2, name: 'add_application_batch' },
+      { version: 3, name: 'add_application_recruitment_type' }
     ])
 
     const columns = context.sqlite.prepare('PRAGMA table_info(applications)').all() as Array<{
