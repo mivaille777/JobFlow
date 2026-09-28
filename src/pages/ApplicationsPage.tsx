@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PageShell } from '../components/PageShell'
+import { ApplicationDetailDrawer } from '../features/applications/ApplicationDetailDrawer'
+import { QuickAddDialog } from '../features/applications/QuickAddDialog'
 import {
   filterAndSortApplications,
   type ApplicationFilters,
@@ -8,6 +10,7 @@ import {
 import {
   applicationPriorities,
   applicationStatuses,
+  type ApplicationDetail,
   type ApplicationListItem,
   type ApplicationPatch
 } from '../shared/application'
@@ -55,6 +58,8 @@ export function ApplicationsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [toast, setToast] = useState('')
+  const [quickAddOpen, setQuickAddOpen] = useState(false)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   useEffect(() => {
     void window.jobflow.applications
@@ -85,6 +90,17 @@ export function ApplicationsPage() {
     [items, filters]
   )
 
+  function showSavedToast(message = '已更新') {
+    setToast(message)
+    window.setTimeout(() => setToast(''), 1600)
+  }
+
+  function mergeDetail(updated: ApplicationDetail) {
+    setItems((current) =>
+      current.map((item) => (item.id === updated.id ? updated : item))
+    )
+  }
+
   async function patchApplication(id: string, patch: ApplicationPatch) {
     const previous = items
     setError('')
@@ -94,13 +110,18 @@ export function ApplicationsPage() {
 
     try {
       const updated = await window.jobflow.applications.update(id, patch)
-      setItems((current) => current.map((item) => (item.id === id ? updated : item)))
-      setToast('已更新')
-      window.setTimeout(() => setToast(''), 1600)
+      mergeDetail(updated)
+      showSavedToast()
     } catch {
       setItems(previous)
       setError('更新失败，数据已恢复。')
     }
+  }
+
+  function handleCreated(application: ApplicationDetail) {
+    setItems((current) => [application, ...current])
+    setSelectedId(application.id)
+    showSavedToast('岗位已新增')
   }
 
   return (
@@ -128,8 +149,17 @@ export function ApplicationsPage() {
               </button>
             ))}
           </div>
-          <div className="text-sm text-muted">
-            {visibleItems.length} / {items.length} 个岗位
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-muted">
+              {visibleItems.length} / {items.length} 个岗位
+            </div>
+            <button
+              type="button"
+              onClick={() => setQuickAddOpen(true)}
+              className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+            >
+              + 新增岗位
+            </button>
           </div>
         </div>
 
@@ -151,9 +181,7 @@ export function ApplicationsPage() {
           >
             <option value="">全部状态</option>
             {applicationStatuses.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
+              <option key={status} value={status}>{status}</option>
             ))}
           </select>
           <select
@@ -165,9 +193,7 @@ export function ApplicationsPage() {
           >
             <option value="">全部方向</option>
             {directions.map((direction) => (
-              <option key={direction} value={direction}>
-                {direction}
-              </option>
+              <option key={direction} value={direction}>{direction}</option>
             ))}
           </select>
           <select
@@ -179,9 +205,7 @@ export function ApplicationsPage() {
           >
             <option value="">优先级</option>
             {applicationPriorities.map((priority) => (
-              <option key={priority} value={priority}>
-                {priority}
-              </option>
+              <option key={priority} value={priority}>{priority}</option>
             ))}
           </select>
           <select
@@ -193,9 +217,7 @@ export function ApplicationsPage() {
           >
             <option value="">全部渠道</option>
             {channels.map((channel) => (
-              <option key={channel} value={channel}>
-                {channel}
-              </option>
+              <option key={channel} value={channel}>{channel}</option>
             ))}
           </select>
           <select
@@ -251,27 +273,30 @@ export function ApplicationsPage() {
                       </div>
                       <div className="mt-1 text-sm text-slate-400">
                         {items.length === 0
-                          ? 'Stage 3 会加入快速新增岗位。'
+                          ? '点击右上角“新增岗位”开始记录。'
                           : '调整搜索词或筛选条件后再试。'}
                       </div>
                     </td>
                   </tr>
                 ) : (
                   visibleItems.map((item) => (
-                    <tr key={item.id} className="transition-colors hover:bg-slate-50/70">
+                    <tr
+                      key={item.id}
+                      onClick={() => setSelectedId(item.id)}
+                      className="cursor-pointer transition-colors hover:bg-slate-50/70"
+                    >
                       <td className="px-4 py-3">
                         <select
                           aria-label={`${item.companyName} 优先级`}
                           value={item.priority}
+                          onClick={(event) => event.stopPropagation()}
                           onChange={(event) =>
                             void patchApplication(item.id, { priority: event.target.value })
                           }
                           className="rounded-md border border-line bg-white px-2 py-1 font-semibold"
                         >
                           {applicationPriorities.map((priority) => (
-                            <option key={priority} value={priority}>
-                              {priority}
-                            </option>
+                            <option key={priority} value={priority}>{priority}</option>
                           ))}
                         </select>
                       </td>
@@ -286,15 +311,14 @@ export function ApplicationsPage() {
                         <select
                           aria-label={`${item.companyName} 状态`}
                           value={item.status}
+                          onClick={(event) => event.stopPropagation()}
                           onChange={(event) =>
                             void patchApplication(item.id, { status: event.target.value })
                           }
                           className={`rounded-md border-0 px-2 py-1 text-xs font-medium ${statusClass(item.status)}`}
                         >
                           {applicationStatuses.map((status) => (
-                            <option key={status} value={status}>
-                              {status}
-                            </option>
+                            <option key={status} value={status}>{status}</option>
                           ))}
                         </select>
                       </td>
@@ -303,6 +327,7 @@ export function ApplicationsPage() {
                           key={`${item.id}-${item.stage ?? ''}`}
                           defaultValue={item.stage ?? ''}
                           placeholder="填写节点"
+                          onClick={(event) => event.stopPropagation()}
                           onBlur={(event) => {
                             const value = event.target.value.trim()
                             if (value !== (item.stage ?? '')) {
@@ -316,6 +341,7 @@ export function ApplicationsPage() {
                         <input
                           type="date"
                           value={item.nextActionDate?.slice(0, 10) ?? ''}
+                          onClick={(event) => event.stopPropagation()}
                           onChange={(event) =>
                             void patchApplication(item.id, {
                               nextActionDate: event.target.value || null
@@ -335,8 +361,23 @@ export function ApplicationsPage() {
         </div>
       </div>
 
+      <QuickAddDialog
+        open={quickAddOpen}
+        onClose={() => setQuickAddOpen(false)}
+        onCreated={handleCreated}
+      />
+
+      <ApplicationDetailDrawer
+        applicationId={selectedId}
+        onClose={() => setSelectedId(null)}
+        onUpdated={(updated) => {
+          mergeDetail(updated)
+          showSavedToast()
+        }}
+      />
+
       {toast ? (
-        <div className="fixed bottom-6 right-6 rounded-lg bg-ink px-4 py-2 text-sm text-white shadow-lg">
+        <div className="fixed bottom-6 right-6 z-[60] rounded-lg bg-ink px-4 py-2 text-sm text-white shadow-lg">
           ✓ {toast}
         </div>
       ) : null}

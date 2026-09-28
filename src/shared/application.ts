@@ -31,9 +31,46 @@ export interface ApplicationListItem {
   updatedAt: string
 }
 
+export interface ApplicationDetail extends ApplicationListItem {
+  jobUrl: string | null
+  jobId: string | null
+  referral: string | null
+  resumeVersion: string | null
+  finalResult: string | null
+  notes: string | null
+  createdAt: string
+}
+
+export interface CreateApplicationRequest {
+  companyName: string
+  jobTitle: string
+  direction?: string | null
+  location?: string | null
+  priority?: string
+  status?: string
+  jobUrl?: string | null
+  jobId?: string | null
+  channel?: string | null
+  referral?: string | null
+  resumeVersion?: string | null
+  applicationDate?: string | null
+  notes?: string | null
+}
+
 export interface ApplicationPatch {
   priority?: string
   status?: string
   stage?: string | null
+  nextAction?: string | null
   nextActionDate?: string | null
+  direction?: string | null
+  location?: string | null
+  jobUrl?: string | null
+  jobId?: string | null
+  channel?: string | null
+  referral?: string | null
+  resumeVersion?: string | null
+  applicationDate?: string | null
+  finalResult?: string | null
+  notes?: string | null
 }
