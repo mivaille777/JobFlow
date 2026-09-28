@@ -25,6 +25,7 @@ const initialFilters: ApplicationFilters = {
   status: '',
   direction: '',
   priority: '',
+  channel: '',
   quick: 'all',
   sort: 'updatedAt'
 }
@@ -67,6 +68,14 @@ export function ApplicationsPage() {
     () =>
       Array.from(
         new Set(items.map((item) => item.direction).filter((value): value is string => Boolean(value)))
+      ).sort(),
+    [items]
+  )
+
+  const channels = useMemo(
+    () =>
+      Array.from(
+        new Set(items.map((item) => item.channel).filter((value): value is string => Boolean(value)))
       ).sort(),
     [items]
   )
@@ -124,7 +133,7 @@ export function ApplicationsPage() {
           </div>
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_160px_160px_120px_150px]">
+        <div className="grid gap-3 xl:grid-cols-[minmax(220px,1fr)_150px_150px_110px_140px_140px]">
           <input
             value={filters.search}
             onChange={(event) =>
@@ -176,6 +185,20 @@ export function ApplicationsPage() {
             ))}
           </select>
           <select
+            value={filters.channel}
+            onChange={(event) =>
+              setFilters((current) => ({ ...current, channel: event.target.value }))
+            }
+            className="rounded-lg border border-line bg-white px-3 py-2 text-sm"
+          >
+            <option value="">全部渠道</option>
+            {channels.map((channel) => (
+              <option key={channel} value={channel}>
+                {channel}
+              </option>
+            ))}
+          </select>
+          <select
             value={filters.sort}
             onChange={(event) =>
               setFilters((current) => ({
@@ -200,7 +223,7 @@ export function ApplicationsPage() {
 
         <div className="overflow-hidden rounded-xl border border-line">
           <div className="overflow-x-auto">
-            <table className="min-w-[1050px] w-full border-collapse text-left text-sm">
+            <table className="w-full min-w-[1050px] border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">优先级</th>
