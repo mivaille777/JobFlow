@@ -3,6 +3,10 @@ import type {
   ApplicationPatch,
   CreateApplicationRequest
 } from '../../src/shared/application'
+import type {
+  CreateInterviewRequest,
+  InterviewPatch
+} from '../../src/shared/interview'
 
 const jobflowApi = {
   app: {
@@ -19,6 +23,15 @@ const jobflowApi = {
       ipcRenderer.invoke('jobflow:applications:create', input),
     update: (id: string, patch: ApplicationPatch) =>
       ipcRenderer.invoke('jobflow:applications:update', id, patch)
+  },
+  interviews: {
+    list: () => ipcRenderer.invoke('jobflow:interviews:list'),
+    get: (id: string) => ipcRenderer.invoke('jobflow:interviews:get', id),
+    create: (input: CreateInterviewRequest) =>
+      ipcRenderer.invoke('jobflow:interviews:create', input),
+    update: (id: string, patch: InterviewPatch) =>
+      ipcRenderer.invoke('jobflow:interviews:update', id, patch),
+    delete: (id: string) => ipcRenderer.invoke('jobflow:interviews:delete', id)
   }
 }
 
