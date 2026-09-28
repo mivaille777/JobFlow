@@ -12,6 +12,9 @@ const jobflowApi = {
   app: {
     getVersion: (): Promise<string> => ipcRenderer.invoke('jobflow:app-version')
   },
+  analytics: {
+    get: () => ipcRenderer.invoke('jobflow:analytics:get')
+  },
   today: {
     get: () => ipcRenderer.invoke('jobflow:today:get')
   },
