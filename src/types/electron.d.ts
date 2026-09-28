@@ -1,4 +1,9 @@
-import type { ApplicationListItem, ApplicationPatch } from '../shared/application'
+import type {
+  ApplicationDetail,
+  ApplicationListItem,
+  ApplicationPatch,
+  CreateApplicationRequest
+} from '../shared/application'
 
 export {}
 
@@ -10,7 +15,9 @@ declare global {
       }
       applications: {
         list: () => Promise<ApplicationListItem[]>
-        update: (id: string, patch: ApplicationPatch) => Promise<ApplicationListItem>
+        get: (id: string) => Promise<ApplicationDetail>
+        create: (input: CreateApplicationRequest) => Promise<ApplicationDetail>
+        update: (id: string, patch: ApplicationPatch) => Promise<ApplicationDetail>
       }
     }
   }

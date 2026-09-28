@@ -52,6 +52,10 @@ export class CompanyRepository {
     return this.db.select().from(companies).where(eq(companies.id, id)).get()
   }
 
+  findByName(name: string) {
+    return this.db.select().from(companies).where(eq(companies.name, name)).get()
+  }
+
   list() {
     return this.db.select().from(companies).all()
   }
@@ -73,6 +77,17 @@ const applicationListSelection = {
   applicationDate: applications.applicationDate,
   lastProgressAt: applications.lastProgressAt,
   updatedAt: applications.updatedAt
+}
+
+const applicationDetailSelection = {
+  ...applicationListSelection,
+  jobUrl: applications.jobUrl,
+  jobId: applications.jobId,
+  referral: applications.referral,
+  resumeVersion: applications.resumeVersion,
+  finalResult: applications.finalResult,
+  notes: applications.notes,
+  createdAt: applications.createdAt
 }
 
 export class ApplicationRepository {
@@ -115,6 +130,15 @@ export class ApplicationRepository {
   getWithCompany(id: string) {
     return this.db
       .select(applicationListSelection)
+      .from(applications)
+      .innerJoin(companies, eq(applications.companyId, companies.id))
+      .where(eq(applications.id, id))
+      .get()
+  }
+
+  getDetailWithCompany(id: string) {
+    return this.db
+      .select(applicationDetailSelection)
       .from(applications)
       .innerJoin(companies, eq(applications.companyId, companies.id))
       .where(eq(applications.id, id))

@@ -1,5 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { ApplicationPatch } from '../../src/shared/application'
+import type {
+  ApplicationPatch,
+  CreateApplicationRequest
+} from '../../src/shared/application'
 
 const jobflowApi = {
   app: {
@@ -7,6 +10,9 @@ const jobflowApi = {
   },
   applications: {
     list: () => ipcRenderer.invoke('jobflow:applications:list'),
+    get: (id: string) => ipcRenderer.invoke('jobflow:applications:get', id),
+    create: (input: CreateApplicationRequest) =>
+      ipcRenderer.invoke('jobflow:applications:create', input),
     update: (id: string, patch: ApplicationPatch) =>
       ipcRenderer.invoke('jobflow:applications:update', id, patch)
   }
