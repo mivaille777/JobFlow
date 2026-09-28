@@ -8,24 +8,24 @@ export interface ApplicationFilters {
   status: string
   direction: string
   priority: string
+  channel: string
   quick: QuickFilter
   sort: ApplicationSort
 }
 
 const priorityOrder: Record<string, number> = { S: 0, A: 1, B: 2, C: 3 }
 
-function parseDate(value: string | null): number {
-  if (!value) return Number.POSITIVE_INFINITY
+function dateValue(value: string | null, fallback: number): number {
+  if (!value) return fallback
   const time = Date.parse(value)
-  return Number.isNaN(time) ? Number.POSITIVE_INFINITY : time
+  return Number.isNaN(time) ? fallback : time
 }
 
 function isActionDue(item: ApplicationListItem, now: Date): boolean {
   if (!item.nextActionDate || item.status === '已结束' || item.status === '暂停') return false
   const due = Date.parse(item.nextActionDate)
   if (Number.isNaN(due)) return false
-  const sevenDays = 7 * 24 * 60 * 60 * 1000
-  return due <= now.getTime() + sevenDays
+  return due <= now.getTime() + 7 * 24 * 60 * 60 * 1000
 }
 
 export function filterAndSortApplications(
@@ -47,6 +47,7 @@ export function filterAndSortApplications(
       if (filters.status && item.status !== filters.status) return false
       if (filters.direction && item.direction !== filters.direction) return false
       if (filters.priority && item.priority !== filters.priority) return false
+      if (filters.channel && item.channel !== filters.channel) return false
 
       if (filters.quick === 'active' && ['已结束', '暂停'].includes(item.status)) return false
       if (filters.quick === 'action' && !isActionDue(item, now)) return false
@@ -59,15 +60,13 @@ export function filterAndSortApplications(
       if (filters.sort === 'priority') {
         return (priorityOrder[a.priority] ?? 99) - (priorityOrder[b.priority] ?? 99)
       }
-
       if (filters.sort === 'applicationDate') {
-        return parseDate(b.applicationDate) - parseDate(a.applicationDate)
+        return dateValue(b.applicationDate, 0) - dateValue(a.applicationDate, 0)
       }
-
       if (filters.sort === 'nextActionDate') {
-        return parseDate(a.nextActionDate) - parseDate(b.nextActionDate)
+        return dateValue(a.nextActionDate, Number.MAX_SAFE_INTEGER) -
+          dateValue(b.nextActionDate, Number.MAX_SAFE_INTEGER)
       }
-
-      return parseDate(b.updatedAt) - parseDate(a.updatedAt)
+      return dateValue(b.updatedAt, 0) - dateValue(a.updatedAt, 0)
     })
 }
