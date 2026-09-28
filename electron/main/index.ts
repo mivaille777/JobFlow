@@ -5,6 +5,7 @@ import { registerAnalyticsIpc } from './ipc/analytics'
 import { registerApplicationIpc } from './ipc/applications'
 import { registerInterviewIpc } from './ipc/interviews'
 import { registerTodayIpc } from './ipc/today'
+import { registerTransferIpc } from './ipc/transfer'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -42,6 +43,7 @@ app.whenReady().then(() => {
   registerApplicationIpc()
   registerInterviewIpc()
   registerTodayIpc()
+  registerTransferIpc()
 
   ipcMain.handle('jobflow:app-version', () => app.getVersion())
   createWindow()
