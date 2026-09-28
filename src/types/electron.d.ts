@@ -12,6 +12,10 @@ import type {
   InterviewListItem,
   InterviewPatch
 } from '../shared/interview'
+import type {
+  JobFlowSettings,
+  JobFlowSettingsPatch
+} from '../shared/settings'
 import type { TodayDashboardData } from '../shared/today'
 import type {
   BackupRestoreResult,
@@ -25,15 +29,9 @@ export {}
 declare global {
   interface Window {
     jobflow: {
-      app: {
-        getVersion: () => Promise<string>
-      }
-      analytics: {
-        get: () => Promise<AnalyticsDashboardData>
-      }
-      today: {
-        get: () => Promise<TodayDashboardData>
-      }
+      app: { getVersion: () => Promise<string> }
+      analytics: { get: () => Promise<AnalyticsDashboardData> }
+      today: { get: () => Promise<TodayDashboardData> }
       applications: {
         list: () => Promise<ApplicationListItem[]>
         get: (id: string) => Promise<ApplicationDetail>
@@ -47,6 +45,10 @@ declare global {
         create: (input: CreateInterviewRequest) => Promise<InterviewDetail>
         update: (id: string, patch: InterviewPatch) => Promise<InterviewDetail>
         delete: (id: string) => Promise<void>
+      }
+      settings: {
+        get: () => Promise<JobFlowSettings>
+        update: (patch: JobFlowSettingsPatch) => Promise<JobFlowSettings>
       }
       transfer: {
         previewExcel: () => Promise<ExcelImportPreview | null>
