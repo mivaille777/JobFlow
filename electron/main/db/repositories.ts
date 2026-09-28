@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { desc, eq } from 'drizzle-orm'
+import { asc, desc, eq } from 'drizzle-orm'
 import type { JobFlowDatabase } from './client'
 import {
   applicationEvents,
@@ -88,6 +88,28 @@ const applicationDetailSelection = {
   finalResult: applications.finalResult,
   notes: applications.notes,
   createdAt: applications.createdAt
+}
+
+const recentEventSelection = {
+  id: applicationEvents.id,
+  applicationId: applicationEvents.applicationId,
+  companyName: companies.name,
+  jobTitle: applications.jobTitle,
+  eventType: applicationEvents.eventType,
+  title: applicationEvents.title,
+  description: applicationEvents.description,
+  createdAt: applicationEvents.createdAt
+}
+
+const interviewDashboardSelection = {
+  id: interviews.id,
+  applicationId: interviews.applicationId,
+  companyName: companies.name,
+  jobTitle: applications.jobTitle,
+  round: interviews.round,
+  scheduledAt: interviews.scheduledAt,
+  format: interviews.format,
+  result: interviews.result
 }
 
 export class ApplicationRepository {
@@ -211,6 +233,17 @@ export class EventRepository {
       .orderBy(desc(applicationEvents.createdAt))
       .all()
   }
+
+  listRecentWithApplication(limit = 10) {
+    return this.db
+      .select(recentEventSelection)
+      .from(applicationEvents)
+      .innerJoin(applications, eq(applicationEvents.applicationId, applications.id))
+      .innerJoin(companies, eq(applications.companyId, companies.id))
+      .orderBy(desc(applicationEvents.createdAt))
+      .limit(limit)
+      .all()
+  }
 }
 
 export class InterviewRepository {
@@ -256,6 +289,16 @@ export class InterviewRepository {
       .from(interviews)
       .where(eq(interviews.applicationId, applicationId))
       .orderBy(interviews.scheduledAt)
+      .all()
+  }
+
+  listWithApplication() {
+    return this.db
+      .select(interviewDashboardSelection)
+      .from(interviews)
+      .innerJoin(applications, eq(interviews.applicationId, applications.id))
+      .innerJoin(companies, eq(applications.companyId, companies.id))
+      .orderBy(asc(interviews.scheduledAt))
       .all()
   }
 
