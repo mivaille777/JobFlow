@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { navigationItems } from './app/navigation'
+import { applyThemePreference } from './app/theme'
 import { AnalyticsPage } from './pages/AnalyticsPage'
 import { ApplicationsPage } from './pages/ApplicationsPage'
 import { InterviewsPage } from './pages/InterviewsPage'
@@ -15,6 +17,13 @@ const pageByPath = {
 } as const
 
 export default function App() {
+  useEffect(() => {
+    void window.jobflow.settings
+      .get()
+      .then((settings) => applyThemePreference(settings.theme))
+      .catch(() => applyThemePreference('system'))
+  }, [])
+
   return (
     <div className="min-h-screen bg-canvas text-ink">
       <div className="grid min-h-screen grid-cols-[220px_1fr]">
