@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { applicationPriorityClass, applicationStatusClass } from '../../app/presentation'
+import { showToast } from '../../components/ToastViewport'
 import {
   applicationPriorities,
   applicationStatuses,
@@ -120,9 +122,10 @@ export function ApplicationDetailDrawer({
       ) {
         setEvents(await window.jobflow.applications.events(detail.id))
       }
-    } catch {
+    } catch (reason) {
+      console.error('Failed to save application detail', reason)
       setDetail(previous)
-      setError('保存失败，已恢复原值。')
+      showToast('操作失败，请重试', 'error')
     }
   }
 
@@ -131,10 +134,10 @@ export function ApplicationDetailDrawer({
       <button
         type="button"
         aria-label="关闭岗位详情"
-        className="absolute inset-0 bg-slate-950/15"
+        className="jobflow-fade-in absolute inset-0 bg-slate-950/15"
         onClick={onClose}
       />
-      <aside className="absolute inset-y-0 right-0 flex w-full max-w-[480px] flex-col border-l border-line bg-white shadow-2xl">
+      <aside className="jobflow-drawer-in absolute inset-y-0 right-0 flex w-full max-w-[480px] flex-col border-l border-line bg-white shadow-2xl">
         {loading ? (
           <div className="space-y-4 p-6">
             <div className="h-7 w-1/2 animate-pulse rounded bg-slate-100" />
@@ -149,10 +152,10 @@ export function ApplicationDetailDrawer({
                   <div className="text-sm font-medium text-muted">{detail.companyName}</div>
                   <h2 className="mt-1 text-xl font-semibold leading-7">{detail.jobTitle}</h2>
                   <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 font-semibold">
+                    <span className={`rounded-full px-2.5 py-1 font-semibold ${applicationPriorityClass(detail.priority)}`}>
                       {detail.priority}
                     </span>
-                    <span className="rounded-full bg-blue-50 px-2.5 py-1 text-blue-700">
+                    <span className={`rounded-full px-2.5 py-1 ${applicationStatusClass(detail.status)}`}>
                       {detail.status}{detail.stage ? ` · ${detail.stage}` : ''}
                     </span>
                     {detail.location ? (
