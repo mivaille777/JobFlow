@@ -8,6 +8,7 @@ import {
   EventRepository,
   InterviewRepository
 } from '../db/repositories'
+import { runInTransaction } from '../db/transaction'
 
 function describeInterview(round: string, scheduledAt: string, result?: string | null): string {
   const date = new Date(scheduledAt)
@@ -28,7 +29,7 @@ export class InterviewService {
   private readonly interviews: InterviewRepository
   private readonly events: EventRepository
 
-  constructor(db: JobFlowDatabase) {
+  constructor(private readonly db: JobFlowDatabase) {
     this.applications = new ApplicationRepository(db)
     this.interviews = new InterviewRepository(db)
     this.events = new EventRepository(db)
@@ -45,60 +46,75 @@ export class InterviewService {
   }
 
   create(input: CreateInterviewRequest) {
-    const application = this.applications.getById(input.applicationId)
-    if (!application) throw new Error('Application not found.')
+    const interviewId = runInTransaction(this.db, (transactionDb) => {
+      const applications = new ApplicationRepository(transactionDb)
+      const interviews = new InterviewRepository(transactionDb)
+      const events = new EventRepository(transactionDb)
+      const application = applications.getById(input.applicationId)
+      if (!application) throw new Error('Application not found.')
 
-    const interview = this.interviews.create(input)
+      const interview = interviews.create(input)
 
-    this.events.create({
-      applicationId: application.id,
-      eventType: 'INTERVIEW_CREATED',
-      title: `${interview.round}已安排`,
-      newValue: interview.scheduledAt,
-      description: describeInterview(interview.round, interview.scheduledAt, interview.result)
+      events.create({
+        applicationId: application.id,
+        eventType: 'INTERVIEW_CREATED',
+        title: `${interview.round}已安排`,
+        newValue: interview.scheduledAt,
+        description: describeInterview(interview.round, interview.scheduledAt, interview.result)
+      })
+
+      return interview.id
     })
 
-    return this.get(interview.id)
+    return this.get(interviewId)
   }
 
   update(id: string, patch: InterviewPatch) {
-    const before = this.interviews.getById(id)
-    if (!before) throw new Error('Interview not found.')
+    runInTransaction(this.db, (transactionDb) => {
+      const interviews = new InterviewRepository(transactionDb)
+      const events = new EventRepository(transactionDb)
+      const before = interviews.getById(id)
+      if (!before) throw new Error('Interview not found.')
 
-    const updated = this.interviews.update(id, patch)
-    if (!updated) throw new Error('Interview not found.')
+      const updated = interviews.update(id, patch)
+      if (!updated) throw new Error('Interview not found.')
 
-    const meaningfulChange =
-      patch.round !== undefined ||
-      patch.scheduledAt !== undefined ||
-      patch.result !== undefined
+      const meaningfulChange =
+        patch.round !== undefined ||
+        patch.scheduledAt !== undefined ||
+        patch.result !== undefined
 
-    if (meaningfulChange) {
-      this.events.create({
-        applicationId: before.applicationId,
-        eventType: 'INTERVIEW_UPDATED',
-        title: '面试更新',
-        oldValue: before.result,
-        newValue: updated.result,
-        description: describeInterview(updated.round, updated.scheduledAt, updated.result)
-      })
-    }
+      if (meaningfulChange) {
+        events.create({
+          applicationId: before.applicationId,
+          eventType: 'INTERVIEW_UPDATED',
+          title: '面试更新',
+          oldValue: before.result,
+          newValue: updated.result,
+          description: describeInterview(updated.round, updated.scheduledAt, updated.result)
+        })
+      }
+    })
 
     return this.get(id)
   }
 
   delete(id: string): void {
-    const before = this.interviews.getById(id)
-    if (!before) throw new Error('Interview not found.')
+    runInTransaction(this.db, (transactionDb) => {
+      const interviews = new InterviewRepository(transactionDb)
+      const events = new EventRepository(transactionDb)
+      const before = interviews.getById(id)
+      if (!before) throw new Error('Interview not found.')
 
-    this.interviews.delete(id)
+      interviews.delete(id)
 
-    this.events.create({
-      applicationId: before.applicationId,
-      eventType: 'INTERVIEW_UPDATED',
-      title: '面试已删除',
-      oldValue: describeInterview(before.round, before.scheduledAt, before.result),
-      description: before.round
+      events.create({
+        applicationId: before.applicationId,
+        eventType: 'INTERVIEW_UPDATED',
+        title: '面试已删除',
+        oldValue: describeInterview(before.round, before.scheduledAt, before.result),
+        description: before.round
+      })
     })
   }
 }
