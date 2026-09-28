@@ -13,6 +13,12 @@ import type {
   InterviewPatch
 } from '../shared/interview'
 import type { TodayDashboardData } from '../shared/today'
+import type {
+  BackupRestoreResult,
+  ExcelImportPreview,
+  ExcelImportResult,
+  FileOperationResult
+} from '../shared/transfer'
 
 export {}
 
@@ -41,6 +47,13 @@ declare global {
         create: (input: CreateInterviewRequest) => Promise<InterviewDetail>
         update: (id: string, patch: InterviewPatch) => Promise<InterviewDetail>
         delete: (id: string) => Promise<void>
+      }
+      transfer: {
+        previewExcel: () => Promise<ExcelImportPreview | null>
+        confirmExcelImport: (sessionId: string) => Promise<ExcelImportResult>
+        exportExcel: () => Promise<FileOperationResult | null>
+        exportBackup: () => Promise<FileOperationResult | null>
+        importBackup: () => Promise<BackupRestoreResult | null>
       }
     }
   }

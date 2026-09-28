@@ -25,6 +25,7 @@ export const applications = sqliteTable(
     priority: text('priority').notNull().default('A'),
     status: text('status').notNull().default('待投递'),
     stage: text('stage'),
+    batch: text('batch'),
     jobUrl: text('job_url'),
     jobId: text('job_id'),
     channel: text('channel'),

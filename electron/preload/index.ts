@@ -35,6 +35,14 @@ const jobflowApi = {
     update: (id: string, patch: InterviewPatch) =>
       ipcRenderer.invoke('jobflow:interviews:update', id, patch),
     delete: (id: string) => ipcRenderer.invoke('jobflow:interviews:delete', id)
+  },
+  transfer: {
+    previewExcel: () => ipcRenderer.invoke('jobflow:transfer:excel-preview'),
+    confirmExcelImport: (sessionId: string) =>
+      ipcRenderer.invoke('jobflow:transfer:excel-confirm', sessionId),
+    exportExcel: () => ipcRenderer.invoke('jobflow:transfer:excel-export'),
+    exportBackup: () => ipcRenderer.invoke('jobflow:transfer:backup-export'),
+    importBackup: () => ipcRenderer.invoke('jobflow:transfer:backup-import')
   }
 }
 

@@ -32,7 +32,16 @@ describe('database', () => {
       .prepare('SELECT version, name FROM schema_migrations ORDER BY version')
       .all() as Array<{ version: number; name: string }>
 
-    expect(rows).toEqual([{ version: 1, name: 'initial_schema' }])
+    expect(rows).toEqual([
+      { version: 1, name: 'initial_schema' },
+      { version: 2, name: 'add_application_batch' }
+    ])
+
+    const columns = context.sqlite.prepare('PRAGMA table_info(applications)').all() as Array<{
+      name: string
+    }>
+    expect(columns.some((column) => column.name === 'batch')).toBe(true)
+
     context.sqlite.close()
 
     const reopened = createDatabase(join(tempDirs.at(-1)!, 'test.db'))
@@ -40,7 +49,7 @@ describe('database', () => {
       .prepare('SELECT COUNT(*) AS count FROM schema_migrations')
       .get() as { count: number }
 
-    expect(count.count).toBe(1)
+    expect(count.count).toBe(2)
     reopened.sqlite.close()
   })
 
