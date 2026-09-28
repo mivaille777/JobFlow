@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { PageShell } from '../components/PageShell'
 import { ApplicationDetailDrawer } from '../features/applications/ApplicationDetailDrawer'
 import { KanbanBoard } from '../features/applications/KanbanBoard'
@@ -54,6 +55,8 @@ function statusClass(status: string): string {
 }
 
 export function ApplicationsPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [items, setItems] = useState<ApplicationListItem[]>([])
   const [filters, setFilters] = useState<ApplicationFilters>(initialFilters)
   const [loading, setLoading] = useState(true)
@@ -70,6 +73,22 @@ export function ApplicationsPage() {
       .catch(() => setError('读取投递数据失败，请重试。'))
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    const openNew = searchParams.get('new') === '1'
+    const focusSearch = searchParams.get('focus') === 'search'
+    if (!openNew && !focusSearch) return
+
+    if (openNew) setQuickAddOpen(true)
+    if (focusSearch) {
+      window.requestAnimationFrame(() => searchInputRef.current?.focus())
+    }
+
+    const next = new URLSearchParams(searchParams)
+    next.delete('new')
+    next.delete('focus')
+    setSearchParams(next, { replace: true })
+  }, [searchParams, setSearchParams])
 
   const directions = useMemo(
     () =>
@@ -189,6 +208,7 @@ export function ApplicationsPage() {
 
         <div className="grid gap-3 xl:grid-cols-[minmax(220px,1fr)_150px_150px_110px_140px_140px]">
           <input
+            ref={searchInputRef}
             value={filters.search}
             onChange={(event) =>
               setFilters((current) => ({ ...current, search: event.target.value }))
