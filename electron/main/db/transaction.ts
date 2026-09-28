@@ -1,8 +1,11 @@
 import type { JobFlowDatabase } from './client'
 
+type SyncTransaction = <T>(work: (transaction: unknown) => T) => T
+
 export function runInTransaction<T>(
   db: JobFlowDatabase,
   work: (transactionDb: JobFlowDatabase) => T
 ): T {
-  return db.transaction((tx) => work(tx as unknown as JobFlowDatabase))
+  const transaction = db.transaction.bind(db) as unknown as SyncTransaction
+  return transaction((tx) => work(tx as JobFlowDatabase))
 }
