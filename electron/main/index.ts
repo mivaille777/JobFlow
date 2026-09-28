@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join } from 'node:path'
+import { initializeAppDatabase } from './db'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -32,6 +33,8 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  initializeAppDatabase()
+
   ipcMain.handle('jobflow:app-version', () => app.getVersion())
   createWindow()
 
