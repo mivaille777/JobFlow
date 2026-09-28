@@ -16,6 +16,7 @@ const items: ApplicationListItem[] = [
     priority: 'S',
     status: '面试中',
     stage: '二面待面',
+    channel: '内推',
     nextAction: null,
     nextActionDate: '2026-09-29',
     applicationDate: '2026-09-20',
@@ -32,6 +33,7 @@ const items: ApplicationListItem[] = [
     priority: 'A',
     status: '已投递',
     stage: '简历筛选中',
+    channel: '官网',
     nextAction: null,
     nextActionDate: '2026-10-20',
     applicationDate: '2026-09-25',
@@ -45,6 +47,7 @@ const base: ApplicationFilters = {
   status: '',
   direction: '',
   priority: '',
+  channel: '',
   quick: 'all',
   sort: 'updatedAt'
 }
@@ -59,6 +62,7 @@ describe('application filters', () => {
   it('supports structured filters', () => {
     expect(filterAndSortApplications(items, { ...base, status: '面试中' })[0]?.id).toBe('1')
     expect(filterAndSortApplications(items, { ...base, priority: 'A' })[0]?.id).toBe('2')
+    expect(filterAndSortApplications(items, { ...base, channel: '内推' })[0]?.id).toBe('1')
   })
 
   it('finds actions due within seven days', () => {
