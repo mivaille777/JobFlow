@@ -8,13 +8,14 @@ import {
   CompanyRepository,
   EventRepository
 } from '../db/repositories'
+import { runInTransaction } from '../db/transaction'
 
 export class ApplicationService {
   private readonly companies: CompanyRepository
   private readonly applications: ApplicationRepository
   private readonly events: EventRepository
 
-  constructor(db: JobFlowDatabase) {
+  constructor(private readonly db: JobFlowDatabase) {
     this.companies = new CompanyRepository(db)
     this.applications = new ApplicationRepository(db)
     this.events = new EventRepository(db)
@@ -36,80 +37,92 @@ export class ApplicationService {
   }
 
   create(input: CreateApplicationRequest) {
-    const company =
-      this.companies.findByName(input.companyName) ??
-      this.companies.create({ name: input.companyName })
+    const applicationId = runInTransaction(this.db, (transactionDb) => {
+      const companies = new CompanyRepository(transactionDb)
+      const applications = new ApplicationRepository(transactionDb)
+      const events = new EventRepository(transactionDb)
 
-    const application = this.applications.create({
-      companyId: company.id,
-      jobTitle: input.jobTitle,
-      direction: input.direction,
-      location: input.location,
-      priority: input.priority,
-      status: input.status,
-      jobUrl: input.jobUrl,
-      jobId: input.jobId,
-      channel: input.channel,
-      referral: input.referral,
-      resumeVersion: input.resumeVersion,
-      applicationDate: input.applicationDate,
-      notes: input.notes
+      const company =
+        companies.findByName(input.companyName) ??
+        companies.create({ name: input.companyName })
+
+      const application = applications.create({
+        companyId: company.id,
+        jobTitle: input.jobTitle,
+        direction: input.direction,
+        location: input.location,
+        priority: input.priority,
+        status: input.status,
+        jobUrl: input.jobUrl,
+        jobId: input.jobId,
+        channel: input.channel,
+        referral: input.referral,
+        resumeVersion: input.resumeVersion,
+        applicationDate: input.applicationDate,
+        notes: input.notes
+      })
+
+      events.create({
+        applicationId: application.id,
+        eventType: 'CREATED',
+        title: '创建岗位',
+        newValue: application.status,
+        description: `${company.name} · ${application.jobTitle}`
+      })
+
+      return application.id
     })
 
-    this.events.create({
-      applicationId: application.id,
-      eventType: 'CREATED',
-      title: '创建岗位',
-      newValue: application.status,
-      description: `${company.name} · ${application.jobTitle}`
-    })
-
-    return this.get(application.id)
+    return this.get(applicationId)
   }
 
   update(id: string, patch: ApplicationPatch) {
-    const before = this.applications.getById(id)
-    if (!before) throw new Error('Application not found.')
+    runInTransaction(this.db, (transactionDb) => {
+      const applications = new ApplicationRepository(transactionDb)
+      const events = new EventRepository(transactionDb)
+      const before = applications.getById(id)
+      if (!before) throw new Error('Application not found.')
 
-    const progressChanged =
-      patch.status !== undefined ||
-      patch.stage !== undefined ||
-      patch.finalResult !== undefined
+      const progressChanged =
+        patch.status !== undefined ||
+        patch.stage !== undefined ||
+        patch.finalResult !== undefined
 
-    this.applications.update(id, {
-      ...patch,
-      ...(progressChanged ? { lastProgressAt: new Date().toISOString() } : {})
+      applications.update(id, {
+        ...patch,
+        ...(progressChanged ? { lastProgressAt: new Date().toISOString() } : {})
+      })
+
+      if (patch.status !== undefined && patch.status !== before.status) {
+        events.create({
+          applicationId: id,
+          eventType: 'STATUS_CHANGED',
+          title: '状态更新',
+          oldValue: before.status,
+          newValue: patch.status
+        })
+      }
+
+      if (patch.stage !== undefined && patch.stage !== before.stage) {
+        events.create({
+          applicationId: id,
+          eventType: 'STAGE_CHANGED',
+          title: '节点更新',
+          oldValue: before.stage,
+          newValue: patch.stage
+        })
+      }
+
+      if (patch.finalResult !== undefined && patch.finalResult !== before.finalResult) {
+        events.create({
+          applicationId: id,
+          eventType: 'FINAL_RESULT_CHANGED',
+          title: '最终结果更新',
+          oldValue: before.finalResult,
+          newValue: patch.finalResult
+        })
+      }
     })
-
-    if (patch.status !== undefined && patch.status !== before.status) {
-      this.events.create({
-        applicationId: id,
-        eventType: 'STATUS_CHANGED',
-        title: '状态更新',
-        oldValue: before.status,
-        newValue: patch.status
-      })
-    }
-
-    if (patch.stage !== undefined && patch.stage !== before.stage) {
-      this.events.create({
-        applicationId: id,
-        eventType: 'STAGE_CHANGED',
-        title: '节点更新',
-        oldValue: before.stage,
-        newValue: patch.stage
-      })
-    }
-
-    if (patch.finalResult !== undefined && patch.finalResult !== before.finalResult) {
-      this.events.create({
-        applicationId: id,
-        eventType: 'FINAL_RESULT_CHANGED',
-        title: '最终结果更新',
-        oldValue: before.finalResult,
-        newValue: patch.finalResult
-      })
-    }
 
     return this.get(id)
   }
