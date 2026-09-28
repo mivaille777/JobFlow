@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { applicationPriorityClass, applicationStatusClass } from '../../app/presentation'
-import { showToast } from '../../components/ToastViewport'
+import { showToast } from '../../app/toast'
 import {
   applicationPriorities,
   applicationStatuses,
