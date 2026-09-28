@@ -10,6 +10,7 @@ import {
   type DragStartEvent
 } from '@dnd-kit/core'
 import { useMemo, useState, type CSSProperties } from 'react'
+import { applicationPriorityClass } from '../../app/presentation'
 import type { ApplicationListItem } from '../../shared/application'
 import { groupApplicationsByKanbanColumn, kanbanColumns } from './kanban'
 
@@ -54,7 +55,7 @@ function ApplicationCard({
       {...draggable.attributes}
       onClick={() => onOpen?.(item.id)}
       className={[
-        'rounded-xl border border-line bg-white p-3.5 text-left shadow-sm transition',
+        'rounded-xl border border-line bg-white p-3.5 text-left shadow-sm transition duration-150 ease-out',
         overlay ? 'rotate-1 shadow-xl' : 'cursor-grab hover:border-slate-300 hover:shadow-md',
         draggable.isDragging ? 'opacity-30' : ''
       ].join(' ')}
@@ -64,7 +65,7 @@ function ApplicationCard({
           <div className="truncate text-sm font-semibold text-ink">{item.companyName}</div>
           <div className="mt-1 line-clamp-2 text-xs leading-5 text-muted">{item.jobTitle}</div>
         </div>
-        <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold">
+        <span className={`rounded-md px-2 py-1 text-xs font-semibold ${applicationPriorityClass(item.priority)}`}>
           {item.priority}
         </span>
       </div>
@@ -102,7 +103,7 @@ function KanbanColumn({
       <div
         ref={droppable.setNodeRef}
         className={[
-          'min-h-[420px] space-y-2.5 rounded-xl border border-line bg-slate-50/80 p-2.5 transition-colors',
+          'min-h-[420px] space-y-2.5 rounded-xl border border-line bg-slate-50/80 p-2.5 transition-colors duration-150 ease-out',
           droppable.isOver ? 'border-blue-300 bg-blue-50/60' : ''
         ].join(' ')}
       >
