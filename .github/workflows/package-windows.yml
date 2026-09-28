@@ -45,20 +45,20 @@ jobs:
       - name: Verify installer
         shell: pwsh
         run: |
-          $installer = Join-Path $PWD 'release\JobFlow Setup.exe'
-          if (-not (Test-Path $installer)) {
-            throw "Expected installer not found: $installer"
+          $installer = Get-ChildItem -Path (Join-Path $PWD 'release') -Filter 'JobFlow-*-Setup.exe' | Select-Object -First 1
+          if (-not $installer) {
+            throw "Expected versioned installer was not found."
           }
-          $size = (Get-Item $installer).Length
+          $size = $installer.Length
           if ($size -le 0) {
             throw "Installer is empty."
           }
-          Write-Host "Installer verified: $installer ($size bytes)"
+          Write-Host "Installer verified: $($installer.FullName) ($size bytes)"
 
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
           name: JobFlow-Windows-Installer
-          path: release/JobFlow Setup.exe
+          path: release/JobFlow-*-Setup.exe
           if-no-files-found: error
           retention-days: 14
