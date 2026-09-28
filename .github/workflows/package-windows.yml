@@ -7,6 +7,9 @@ on:
       - Prototype
       - ci/stage-16
       - ci/stage-17
+  pull_request:
+    branches:
+      - Prototype
 
 permissions:
   contents: read
