@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join } from 'node:path'
 import { initializeAppDatabase } from './db'
 import { registerApplicationIpc } from './ipc/applications'
+import { registerInterviewIpc } from './ipc/interviews'
 import { registerTodayIpc } from './ipc/today'
 
 function createWindow(): void {
@@ -37,6 +38,7 @@ function createWindow(): void {
 app.whenReady().then(() => {
   initializeAppDatabase()
   registerApplicationIpc()
+  registerInterviewIpc()
   registerTodayIpc()
 
   ipcMain.handle('jobflow:app-version', () => app.getVersion())
