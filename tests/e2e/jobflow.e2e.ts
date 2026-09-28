@@ -20,7 +20,7 @@ test('新增岗位 → 投递 → 面试复盘 → Offer 主链路', async () =>
     await expect(page.getByText('JobFlow', { exact: true })).toBeVisible()
 
     await page.getByRole('link', { name: '投递 Applications' }).click()
-    await page.getByRole('button', { name: '+ 新增岗位' }).click()
+    await page.getByRole('button', { name: '+ 新增岗位' }).first().click()
 
     await page.getByLabel('公司 *').fill('E2E Labs')
     await page.getByLabel('岗位 *').fill('Agent Engineer')
