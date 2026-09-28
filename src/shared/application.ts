@@ -23,6 +23,7 @@ export interface ApplicationListItem {
   priority: string
   status: string
   stage: string | null
+  channel: string | null
   nextAction: string | null
   nextActionDate: string | null
   applicationDate: string | null
