@@ -7,6 +7,7 @@ import type {
   CreateInterviewRequest,
   InterviewPatch
 } from '../../src/shared/interview'
+import type { JobFlowSettingsPatch } from '../../src/shared/settings'
 
 const jobflowApi = {
   app: {
@@ -35,6 +36,11 @@ const jobflowApi = {
     update: (id: string, patch: InterviewPatch) =>
       ipcRenderer.invoke('jobflow:interviews:update', id, patch),
     delete: (id: string) => ipcRenderer.invoke('jobflow:interviews:delete', id)
+  },
+  settings: {
+    get: () => ipcRenderer.invoke('jobflow:settings:get'),
+    update: (patch: JobFlowSettingsPatch) =>
+      ipcRenderer.invoke('jobflow:settings:update', patch)
   },
   transfer: {
     previewExcel: () => ipcRenderer.invoke('jobflow:transfer:excel-preview'),
