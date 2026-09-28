@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { applicationPriorityClass, applicationStatusClass } from '../app/presentation'
 import { PageShell } from '../components/PageShell'
+import { showToast } from '../components/ToastViewport'
 import { ApplicationDetailDrawer } from '../features/applications/ApplicationDetailDrawer'
 import { KanbanBoard } from '../features/applications/KanbanBoard'
 import { QuickAddDialog } from '../features/applications/QuickAddDialog'
@@ -45,23 +47,12 @@ function formatDate(value: string | null): string {
   }).format(date)
 }
 
-function statusClass(status: string): string {
-  if (status === '面试中') return 'bg-violet-50 text-violet-700'
-  if (status === 'Offer阶段') return 'bg-emerald-50 text-emerald-700'
-  if (status === '测评/笔试') return 'bg-amber-50 text-amber-700'
-  if (status === '已结束') return 'bg-rose-50 text-rose-700'
-  if (status === '已投递') return 'bg-blue-50 text-blue-700'
-  return 'bg-slate-100 text-slate-600'
-}
-
 export function ApplicationsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [items, setItems] = useState<ApplicationListItem[]>([])
   const [filters, setFilters] = useState<ApplicationFilters>(initialFilters)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [toast, setToast] = useState('')
   const [quickAddOpen, setQuickAddOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list')
@@ -70,7 +61,10 @@ export function ApplicationsPage() {
     void window.jobflow.applications
       .list()
       .then(setItems)
-      .catch(() => setError('读取投递数据失败，请重试。'))
+      .catch((reason) => {
+        console.error('Failed to load applications', reason)
+        showToast('操作失败，请重试', 'error')
+      })
       .finally(() => setLoading(false))
   }, [])
 
@@ -111,11 +105,6 @@ export function ApplicationsPage() {
     [items, filters]
   )
 
-  function showSavedToast(message = '已更新') {
-    setToast(message)
-    window.setTimeout(() => setToast(''), 1600)
-  }
-
   function mergeDetail(updated: ApplicationDetail) {
     setItems((current) =>
       current.map((item) => (item.id === updated.id ? updated : item))
@@ -124,7 +113,6 @@ export function ApplicationsPage() {
 
   async function patchApplication(id: string, patch: ApplicationPatch) {
     const previous = items
-    setError('')
     setItems((current) =>
       current.map((item) => (item.id === id ? { ...item, ...patch } : item))
     )
@@ -132,17 +120,18 @@ export function ApplicationsPage() {
     try {
       const updated = await window.jobflow.applications.update(id, patch)
       mergeDetail(updated)
-      showSavedToast()
-    } catch {
+      showToast('已更新')
+    } catch (reason) {
+      console.error('Failed to update application', reason)
       setItems(previous)
-      setError('更新失败，数据已恢复。')
+      showToast('操作失败，请重试', 'error')
     }
   }
 
   function handleCreated(application: ApplicationDetail) {
     setItems((current) => [application, ...current])
     setSelectedId(application.id)
-    showSavedToast('岗位已新增')
+    showToast('岗位已新增')
   }
 
   return (
@@ -281,12 +270,6 @@ export function ApplicationsPage() {
           </select>
         </div>
 
-        {error ? (
-          <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {error}
-          </div>
-        ) : null}
-
         {viewMode === 'list' ? (
           <div className="overflow-hidden rounded-xl border border-line">
           <div className="overflow-x-auto">
@@ -306,8 +289,15 @@ export function ApplicationsPage() {
               <tbody className="divide-y divide-line bg-white">
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-muted">
-                      正在读取投递数据…
+                    <td colSpan={8} className="px-4 py-6">
+                      <div className="space-y-3" aria-label="正在读取投递数据">
+                        {[0, 1, 2, 3].map((key) => (
+                          <div
+                            key={key}
+                            className="h-10 animate-pulse rounded-lg bg-slate-100"
+                          />
+                        ))}
+                      </div>
                     </td>
                   </tr>
                 ) : visibleItems.length === 0 ? (
@@ -318,9 +308,18 @@ export function ApplicationsPage() {
                       </div>
                       <div className="mt-1 text-sm text-slate-400">
                         {items.length === 0
-                          ? '点击右上角“新增岗位”开始记录。'
+                          ? '添加你的第一个岗位，开始管理投递流程。'
                           : '调整搜索词或筛选条件后再试。'}
                       </div>
+                      {items.length === 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => setQuickAddOpen(true)}
+                          className="mt-4 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white transition duration-150 ease-out hover:bg-slate-800"
+                        >
+                          + 新增岗位
+                        </button>
+                      ) : null}
                     </td>
                   </tr>
                 ) : (
@@ -338,7 +337,7 @@ export function ApplicationsPage() {
                           onChange={(event) =>
                             void patchApplication(item.id, { priority: event.target.value })
                           }
-                          className="rounded-md border border-line bg-white px-2 py-1 font-semibold"
+                          className={`rounded-md border-0 px-2 py-1 font-semibold ${applicationPriorityClass(item.priority)}`}
                         >
                           {applicationPriorities.map((priority) => (
                             <option key={priority} value={priority}>{priority}</option>
@@ -360,7 +359,7 @@ export function ApplicationsPage() {
                           onChange={(event) =>
                             void patchApplication(item.id, { status: event.target.value })
                           }
-                          className={`rounded-md border-0 px-2 py-1 text-xs font-medium ${statusClass(item.status)}`}
+                          className={`rounded-md border-0 px-2 py-1 text-xs font-medium ${applicationStatusClass(item.status)}`}
                         >
                           {applicationStatuses.map((status) => (
                             <option key={status} value={status}>{status}</option>
@@ -426,15 +425,9 @@ export function ApplicationsPage() {
         onClose={() => setSelectedId(null)}
         onUpdated={(updated) => {
           mergeDetail(updated)
-          showSavedToast()
+          showToast('已更新')
         }}
       />
-
-      {toast ? (
-        <div className="fixed bottom-6 right-6 z-[60] rounded-lg bg-ink px-4 py-2 text-sm text-white shadow-lg">
-          ✓ {toast}
-        </div>
-      ) : null}
     </PageShell>
   )
 }
