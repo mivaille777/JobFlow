@@ -1,5 +1,6 @@
 import type {
   ApplicationDetail,
+  ApplicationEvent,
   ApplicationListItem,
   ApplicationPatch,
   CreateApplicationRequest
@@ -16,6 +17,7 @@ declare global {
       applications: {
         list: () => Promise<ApplicationListItem[]>
         get: (id: string) => Promise<ApplicationDetail>
+        events: (id: string) => Promise<ApplicationEvent[]>
         create: (input: CreateApplicationRequest) => Promise<ApplicationDetail>
         update: (id: string, patch: ApplicationPatch) => Promise<ApplicationDetail>
       }

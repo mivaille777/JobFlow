@@ -41,6 +41,17 @@ export interface ApplicationDetail extends ApplicationListItem {
   createdAt: string
 }
 
+export interface ApplicationEvent {
+  id: string
+  applicationId: string
+  eventType: string
+  oldValue: string | null
+  newValue: string | null
+  title: string
+  description: string | null
+  createdAt: string
+}
+
 export interface CreateApplicationRequest {
   companyName: string
   jobTitle: string
