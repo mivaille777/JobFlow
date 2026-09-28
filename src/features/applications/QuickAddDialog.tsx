@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { showToast } from '../../components/ToastViewport'
+import { showToast } from '../../app/toast'
 import {
   applicationPriorities,
   applicationStatuses,
