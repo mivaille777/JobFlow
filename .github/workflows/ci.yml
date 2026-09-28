@@ -41,3 +41,6 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Electron E2E
+        run: xvfb-run -a npm run test:e2e
