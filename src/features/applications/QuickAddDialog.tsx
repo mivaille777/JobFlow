@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { showToast } from '../../components/ToastViewport'
 import {
   applicationPriorities,
   applicationStatuses,
@@ -94,15 +95,16 @@ export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps
       setForm(initialForm(defaultPriority, directions[0]))
       setAdvanced(false)
       onClose()
-    } catch {
-      setError('新增失败，请检查输入后重试。')
+    } catch (reason) {
+      console.error('Failed to create application', reason)
+      showToast('操作失败，请重试', 'error')
     } finally {
       setSaving(false)
     }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/25 p-4 backdrop-blur-[1px]">
+    <div className="jobflow-fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-950/25 p-4 backdrop-blur-[1px]">
       <button
         type="button"
         aria-label="关闭新增岗位"
@@ -111,7 +113,7 @@ export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps
       />
       <form
         onSubmit={(event) => void submit(event)}
-        className="relative z-10 w-full max-w-xl rounded-2xl border border-line bg-white shadow-2xl"
+        className="jobflow-dialog-in relative z-10 w-full max-w-xl rounded-2xl border border-line bg-white shadow-2xl"
       >
         <div className="flex items-start justify-between border-b border-line px-6 py-5">
           <div>
