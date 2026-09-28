@@ -32,6 +32,22 @@ export interface CreateApplicationInput {
   notes?: string | null
 }
 
+export interface UpdateInterviewInput {
+  round?: string
+  scheduledAt?: string
+  format?: string | null
+  interviewer?: string | null
+  department?: string | null
+  durationMinutes?: number | null
+  result?: string | null
+  mainQuestions?: string | null
+  codingQuestions?: string | null
+  projectQuestions?: string | null
+  selfRating?: number | null
+  improvements?: string | null
+  nextRoundFocus?: string | null
+}
+
 export class CompanyRepository {
   constructor(private readonly db: JobFlowDatabase) {}
 
@@ -101,7 +117,7 @@ const recentEventSelection = {
   createdAt: applicationEvents.createdAt
 }
 
-const interviewDashboardSelection = {
+const interviewDetailSelection = {
   id: interviews.id,
   applicationId: interviews.applicationId,
   companyName: companies.name,
@@ -109,7 +125,18 @@ const interviewDashboardSelection = {
   round: interviews.round,
   scheduledAt: interviews.scheduledAt,
   format: interviews.format,
-  result: interviews.result
+  interviewer: interviews.interviewer,
+  department: interviews.department,
+  durationMinutes: interviews.durationMinutes,
+  result: interviews.result,
+  mainQuestions: interviews.mainQuestions,
+  codingQuestions: interviews.codingQuestions,
+  projectQuestions: interviews.projectQuestions,
+  selfRating: interviews.selfRating,
+  improvements: interviews.improvements,
+  nextRoundFocus: interviews.nextRoundFocus,
+  createdAt: interviews.createdAt,
+  updatedAt: interviews.updatedAt
 }
 
 export class ApplicationRepository {
@@ -283,6 +310,20 @@ export class InterviewRepository {
     return row
   }
 
+  getById(id: string) {
+    return this.db.select().from(interviews).where(eq(interviews.id, id)).get()
+  }
+
+  getWithApplication(id: string) {
+    return this.db
+      .select(interviewDetailSelection)
+      .from(interviews)
+      .innerJoin(applications, eq(interviews.applicationId, applications.id))
+      .innerJoin(companies, eq(applications.companyId, companies.id))
+      .where(eq(interviews.id, id))
+      .get()
+  }
+
   listByApplication(applicationId: string) {
     return this.db
       .select()
@@ -294,12 +335,21 @@ export class InterviewRepository {
 
   listWithApplication() {
     return this.db
-      .select(interviewDashboardSelection)
+      .select(interviewDetailSelection)
       .from(interviews)
       .innerJoin(applications, eq(interviews.applicationId, applications.id))
       .innerJoin(companies, eq(applications.companyId, companies.id))
       .orderBy(asc(interviews.scheduledAt))
       .all()
+  }
+
+  update(id: string, changes: UpdateInterviewInput) {
+    this.db
+      .update(interviews)
+      .set({ ...changes, updatedAt: now() })
+      .where(eq(interviews.id, id))
+      .run()
+    return this.getById(id)
   }
 
   delete(id: string) {
