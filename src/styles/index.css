@@ -51,6 +51,15 @@ textarea {
   font: inherit;
 }
 
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgb(var(--jobflow-accent) / 0.65);
+  outline-offset: 2px;
+}
+
 .dark .bg-white {
   background-color: rgb(17 24 39) !important;
 }
@@ -82,4 +91,73 @@ textarea {
 .dark input::placeholder,
 .dark textarea::placeholder {
   color: rgb(100 116 139);
+}
+
+@keyframes jobflow-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes jobflow-slide-in-right {
+  from {
+    opacity: 0.96;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes jobflow-scale-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes jobflow-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.jobflow-fade-in {
+  animation: jobflow-fade-in 180ms ease-out both;
+}
+
+.jobflow-drawer-in {
+  animation: jobflow-slide-in-right 180ms ease-out both;
+}
+
+.jobflow-dialog-in {
+  animation: jobflow-scale-in 180ms ease-out both;
+}
+
+.jobflow-toast-in {
+  animation: jobflow-toast-in 180ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
