@@ -71,11 +71,11 @@ export function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center bg-slate-950/35 px-4 pt-[14vh] backdrop-blur-sm"
+      className="jobflow-fade-in fixed inset-0 z-[100] flex items-start justify-center bg-slate-950/35 px-4 pt-[14vh] backdrop-blur-sm"
       onMouseDown={() => setOpen(false)}
     >
       <div
-        className="w-full max-w-xl overflow-hidden rounded-2xl border border-line bg-white shadow-2xl"
+        className="jobflow-dialog-in w-full max-w-xl overflow-hidden rounded-2xl border border-line bg-white shadow-2xl"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="border-b border-line p-3">
@@ -120,7 +120,7 @@ export function CommandPalette() {
                 onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => execute(command.path)}
                 className={[
-                  'flex w-full items-center justify-between gap-4 rounded-xl px-3 py-3 text-left transition',
+                  'flex w-full items-center justify-between gap-4 rounded-xl px-3 py-3 text-left transition duration-150 ease-out',
                   index === activeIndex ? 'bg-slate-100' : 'hover:bg-slate-50'
                 ].join(' ')}
               >
