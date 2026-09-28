@@ -18,7 +18,7 @@ const today = () => new Date().toISOString().slice(0, 10)
 
 const initialForm = (
   defaultPriority: ApplicationPriority = 'A',
-  direction = defaultJobDirections[0]
+  direction: string = defaultJobDirections[0]
 ): CreateApplicationRequest => ({
   companyName: '',
   jobTitle: '',
