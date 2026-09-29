@@ -1,4 +1,4 @@
-import { CircleCheck, CircleX, Info } from 'lucide-react'
+import { ErrorIcon, InfoIcon, SuccessIcon } from './Icons'
 import { useEffect, useRef, useState } from 'react'
 import {
   TOAST_EVENT,
@@ -42,7 +42,7 @@ export function ToastViewport() {
 
   if (!toast) return null
 
-  const Icon = toast.tone === 'error' ? CircleX : toast.tone === 'info' ? Info : CircleCheck
+  const Icon = toast.tone === 'error' ? ErrorIcon : toast.tone === 'info' ? InfoIcon : SuccessIcon
 
   return (
     <div className="pointer-events-none fixed bottom-6 right-6 z-[120]">
