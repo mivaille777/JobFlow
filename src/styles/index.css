@@ -529,3 +529,14 @@ textarea:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+.jobflow-surface-card {
+  border-color: rgb(var(--jobflow-line) / 0.82) !important;
+  background: rgb(var(--jobflow-surface) / 0.88) !important;
+  box-shadow:
+    0 1px 2px rgb(var(--jobflow-shadow) / 0.035),
+    0 12px 30px rgb(var(--jobflow-shadow) / 0.035) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
