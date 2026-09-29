@@ -107,7 +107,7 @@ export function PreferencesPanel() {
 
   if (!settings) {
     return (
-      <section className="rounded-2xl border border-line bg-white p-6 shadow-panel">
+      <section className="rounded-2xl border border-line bg-white p-6 shadow-panel jobflow-surface-card">
         <div className="h-5 w-28 animate-pulse rounded bg-slate-200" />
         <div className="mt-5 h-28 animate-pulse rounded-xl bg-slate-100" />
       </section>
@@ -115,7 +115,7 @@ export function PreferencesPanel() {
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-white p-6 shadow-panel">
+    <section className="rounded-2xl border border-line bg-white p-6 shadow-panel jobflow-surface-card">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">偏好设置</h2>
