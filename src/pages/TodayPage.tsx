@@ -143,7 +143,7 @@ function Section({
           : 'text-ink'
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-line bg-white shadow-panel">
+    <section className="overflow-hidden rounded-2xl border border-line bg-white shadow-panel jobflow-surface-card">
       <div className="flex items-center justify-between border-b border-line px-4 py-3">
         <h2 className={`text-sm font-semibold ${toneClass}`}>{title}</h2>
         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-muted">{count}</span>
@@ -181,9 +181,9 @@ export function TodayPage() {
 
   if (error) {
     return (
-      <div className="mx-auto max-w-6xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Today</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">今天需要处理什么？</h1>
+      <div className="mx-auto w-full max-w-7xl">
+        <p className="jobflow-eyebrow">Today</p>
+        <h1 className="mt-2 jobflow-page-title">今天需要处理什么？</h1>
         <div className="mt-7 rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
           {error}
         </div>
@@ -193,7 +193,7 @@ export function TodayPage() {
 
   if (!dashboard) {
     return (
-      <div className="mx-auto max-w-6xl animate-pulse">
+      <div className="mx-auto w-full max-w-7xl animate-pulse">
         <div className="h-3 w-16 rounded bg-slate-200" />
         <div className="mt-4 h-9 w-64 rounded bg-slate-200" />
         <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -224,11 +224,11 @@ export function TodayPage() {
   ]
 
   return (
-    <section className="mx-auto max-w-6xl">
+    <section className="mx-auto w-full max-w-7xl">
       <div className="flex items-start justify-between gap-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Today</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">今天需要处理什么？</h1>
+          <p className="jobflow-eyebrow">Today</p>
+          <h1 className="mt-2 jobflow-page-title">今天需要处理什么？</h1>
           <p className="mt-2 text-sm text-muted">
             优先处理逾期和今日事项，再看未来 7 天与停滞机会。
           </p>
@@ -243,7 +243,7 @@ export function TodayPage() {
 
       <div className="mt-7 grid gap-4 md:grid-cols-3">
         {cards.map((card) => (
-          <div key={card.label} className="rounded-2xl border border-line bg-white p-5 shadow-panel">
+          <div key={card.label} className="rounded-2xl border border-line bg-white p-5 shadow-panel jobflow-surface-card">
             <div className="text-sm text-muted">{card.label}</div>
             <div className="mt-3 text-3xl font-semibold tracking-tight">{card.value}</div>
             <div className="mt-2 text-xs text-slate-400">{card.hint}</div>

@@ -43,9 +43,9 @@ export function AnalyticsPage() {
 
   if (error) {
     return (
-      <section className="mx-auto max-w-6xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Analytics</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">求职数据</h1>
+      <section className="mx-auto w-full max-w-7xl">
+        <p className="jobflow-eyebrow">Analytics</p>
+        <h1 className="mt-2 jobflow-page-title">求职数据</h1>
         <div className="mt-7 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error}
         </div>
@@ -55,7 +55,7 @@ export function AnalyticsPage() {
 
   if (!data) {
     return (
-      <section className="mx-auto max-w-6xl animate-pulse">
+      <section className="mx-auto w-full max-w-7xl animate-pulse">
         <div className="h-3 w-20 rounded bg-slate-200" />
         <div className="mt-4 h-9 w-48 rounded bg-slate-200" />
         <div className="mt-8 grid gap-4 md:grid-cols-4">
@@ -74,9 +74,9 @@ export function AnalyticsPage() {
   const offerRate = applied === 0 ? null : Math.round((offers / applied) * 100)
 
   return (
-    <section className="mx-auto max-w-6xl">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Analytics</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight">求职数据</h1>
+    <section className="mx-auto w-full max-w-7xl">
+      <p className="jobflow-eyebrow">Analytics</p>
+      <h1 className="mt-2 jobflow-page-title">求职数据</h1>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
         只保留能帮助判断投递策略的数据。统计基于你已经记录的岗位、面试和 Timeline 事件。
       </p>
@@ -92,7 +92,7 @@ export function AnalyticsPage() {
             `${data.responseTime.sampleCount} 个有效样本`
           ]
         ].map(([label, value, hint]) => (
-          <div key={label} className="rounded-2xl border border-line bg-white p-5 shadow-panel">
+          <div key={label} className="rounded-2xl border border-line bg-white p-5 shadow-panel jobflow-surface-card">
             <div className="text-sm text-muted">{label}</div>
             <div className="mt-3 text-3xl font-semibold tracking-tight">{value}</div>
             <div className="mt-2 text-xs text-slate-400">{hint}</div>
@@ -101,7 +101,7 @@ export function AnalyticsPage() {
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-2xl border border-line bg-white p-5 shadow-panel">
+        <section className="rounded-2xl border border-line bg-white p-5 shadow-panel jobflow-surface-card">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-sm font-semibold">投递 Funnel</h2>
@@ -133,7 +133,7 @@ export function AnalyticsPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-line bg-white p-5 shadow-panel">
+        <section className="rounded-2xl border border-line bg-white p-5 shadow-panel jobflow-surface-card">
           <div>
             <h2 className="text-sm font-semibold">投递渠道</h2>
             <p className="mt-1 text-xs text-muted">看你的岗位主要从哪里进入</p>
@@ -162,7 +162,7 @@ export function AnalyticsPage() {
         </section>
       </div>
 
-      <section className="mt-5 overflow-hidden rounded-2xl border border-line bg-white shadow-panel">
+      <section className="mt-5 overflow-hidden rounded-2xl border border-line bg-white shadow-panel jobflow-surface-card">
         <div className="border-b border-line px-5 py-4">
           <h2 className="text-sm font-semibold">岗位方向</h2>
           <p className="mt-1 text-xs text-muted">记录数、进入面试数与 Offer 数并排查看</p>

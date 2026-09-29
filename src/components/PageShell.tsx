@@ -9,15 +9,17 @@ interface PageShellProps {
 
 export function PageShell({ eyebrow, title, description, children }: PageShellProps) {
   return (
-    <section className="mx-auto max-w-6xl">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">{eyebrow}</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight">{title}</h1>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{description}</p>
+    <section className="mx-auto w-full max-w-7xl">
+      <header className="jobflow-page-header">
+        <p className="jobflow-eyebrow">{eyebrow}</p>
+        <h1 className="jobflow-page-title">{title}</h1>
+        <p className="jobflow-page-description">{description}</p>
+      </header>
 
-      <div className="mt-7 rounded-2xl border border-line bg-white p-6 shadow-panel">
+      <div className="jobflow-page-panel">
         {children ?? (
           <div className="flex min-h-56 items-center justify-center text-sm text-slate-400">
-            Stage 0 · Workspace ready
+            Workspace ready
           </div>
         )}
       </div>

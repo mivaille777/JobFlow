@@ -1,3 +1,4 @@
+import { ErrorIcon, InfoIcon, SuccessIcon } from './Icons'
 import { useEffect, useRef, useState } from 'react'
 import {
   TOAST_EVENT,
@@ -41,20 +42,13 @@ export function ToastViewport() {
 
   if (!toast) return null
 
-  const toneClass =
-    toast.tone === 'error'
-      ? 'border-rose-200 bg-rose-600 text-white'
-      : toast.tone === 'info'
-        ? 'border-blue-200 bg-blue-600 text-white'
-        : 'border-emerald-200 bg-emerald-600 text-white'
+  const Icon = toast.tone === 'error' ? ErrorIcon : toast.tone === 'info' ? InfoIcon : SuccessIcon
 
   return (
     <div className="pointer-events-none fixed bottom-6 right-6 z-[120]">
-      <div
-        key={toast.id}
-        className={`jobflow-toast-in min-w-56 max-w-sm rounded-xl border px-4 py-3 text-sm font-medium shadow-xl ${toneClass}`}
-      >
-        {toast.message}
+      <div key={toast.id} className="jobflow-toast-in jobflow-toast">
+        <Icon size={16} />
+        <span>{toast.message}</span>
       </div>
     </div>
   )

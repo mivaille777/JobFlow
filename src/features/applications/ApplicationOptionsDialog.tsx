@@ -62,7 +62,7 @@ export function ApplicationOptionsDialog({
   }
 
   return (
-    <div className="jobflow-fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-950/25 p-4 backdrop-blur-[1px]">
+    <div className="jobflow-fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-950/20 p-4 backdrop-blur-md">
       <button
         type="button"
         aria-label="关闭投递选项设置"
@@ -72,7 +72,7 @@ export function ApplicationOptionsDialog({
       <section
         role="dialog"
         aria-label="投递选项设置"
-        className="jobflow-dialog-in relative z-10 w-full max-w-2xl rounded-2xl border border-line bg-white shadow-2xl"
+        className="jobflow-dialog-in relative z-10 w-full max-w-2xl jobflow-dialog-in"
       >
         <header className="flex items-start justify-between border-b border-line px-6 py-5">
           <div>

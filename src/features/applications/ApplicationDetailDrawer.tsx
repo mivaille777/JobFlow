@@ -157,10 +157,10 @@ export function ApplicationDetailDrawer({
       <button
         type="button"
         aria-label="关闭岗位详情"
-        className="jobflow-fade-in absolute inset-0 bg-slate-950/15"
+        className="jobflow-fade-in absolute inset-0 bg-slate-950/15 backdrop-blur-[2px]"
         onClick={onClose}
       />
-      <aside className="jobflow-drawer-in absolute inset-y-0 right-0 flex w-full max-w-[480px] flex-col border-l border-line bg-white shadow-2xl">
+      <aside aria-label="岗位详情" className="jobflow-drawer-in absolute inset-y-0 right-0 flex w-full max-w-[480px] flex-col border-l border-line bg-white shadow-2xl">
         {loading ? (
           <div className="space-y-4 p-6">
             <div className="h-7 w-1/2 animate-pulse rounded bg-slate-100" />

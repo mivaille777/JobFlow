@@ -13,13 +13,29 @@ const customUserDataDirectory = process.env.JOBFLOW_USER_DATA_DIR
 if (customUserDataDirectory) app.setPath('userData', customUserDataDirectory)
 
 function createWindow(): void {
+  const isMac = process.platform === 'darwin'
+  const isWindows = process.platform === 'win32'
+
   const mainWindow = new BrowserWindow({
-    width: 1240,
-    height: 820,
-    minWidth: 980,
-    minHeight: 680,
-    backgroundColor: '#f7f8fa',
+    width: 1320,
+    height: 860,
+    minWidth: 1000,
+    minHeight: 700,
+    backgroundColor: '#f3f4f6',
     title: 'JobFlow',
+    autoHideMenuBar: true,
+    titleBarStyle: isMac ? 'hiddenInset' : 'hidden',
+    ...(isMac ? { trafficLightPosition: { x: 16, y: 16 } } : {}),
+    ...(!isMac
+      ? {
+          titleBarOverlay: {
+            color: '#00000000',
+            symbolColor: '#667085',
+            height: 44
+          }
+        }
+      : {}),
+    ...(isWindows ? { backgroundMaterial: 'mica' as const } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
