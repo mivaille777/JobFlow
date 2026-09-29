@@ -88,7 +88,7 @@ textarea:focus-visible {
 .jobflow-windowbar {
   position: fixed;
   inset: 0 0 auto 0;
-  z-index: 80;
+  z-index: 30;
   height: 44px;
   display: flex;
   align-items: center;
