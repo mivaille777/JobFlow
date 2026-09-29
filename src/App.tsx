@@ -1,16 +1,8 @@
-import { useEffect } from 'react'
-import {
-  BarChart3,
-  BriefcaseBusiness,
-  CalendarDays,
-  Command,
-  LayoutDashboard,
-  Settings2
-} from 'lucide-react'
+import { BriefcaseIcon, CalendarIcon, ChartIcon, CommandIconIcon, DashboardIcon, SettingsIcon } from './components/Icons'
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { navigationItems } from './app/navigation'
 import { applyThemePreference } from './app/theme'
-import { CommandPalette } from './components/CommandPalette'
+import { CommandIconPalette } from './components/CommandIconPalette'
 import { ToastViewport } from './components/ToastViewport'
 import { AnalyticsPage } from './pages/AnalyticsPage'
 import { ApplicationsPage } from './pages/ApplicationsPage'
@@ -27,11 +19,11 @@ const pageByPath = {
 } as const
 
 const iconByPath = {
-  '/': LayoutDashboard,
-  '/applications': BriefcaseBusiness,
-  '/interviews': CalendarDays,
-  '/analytics': BarChart3,
-  '/settings': Settings2
+  '/': DashboardIcon,
+  '/applications': BriefcaseIcon,
+  '/interviews': CalendarIcon,
+  '/analytics': ChartIcon,
+  '/settings': SettingsIcon
 } as const
 
 export default function App() {
@@ -55,7 +47,7 @@ export default function App() {
         <aside className="jobflow-sidebar">
           <div className="jobflow-brand">
             <div className="jobflow-brand-icon">
-              <BriefcaseBusiness size={17} strokeWidth={2} />
+              <BriefcaseIcon size={17} strokeWidth={2} />
             </div>
             <div className="min-w-0">
               <div className="truncate text-[15px] font-semibold tracking-[-0.01em]">JobFlow</div>
@@ -90,7 +82,7 @@ export default function App() {
               className="jobflow-command-hint"
               onClick={() => window.dispatchEvent(new CustomEvent('jobflow:open-command-palette'))}
             >
-              <Command size={14} />
+              <CommandIcon size={14} />
               <span>快速操作</span>
               <kbd>Ctrl K</kbd>
             </button>
@@ -108,7 +100,7 @@ export default function App() {
         </main>
       </div>
 
-      <CommandPalette />
+      <CommandIconPalette />
       <ToastViewport />
     </div>
   )
