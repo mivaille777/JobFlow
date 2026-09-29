@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react'
+import { SearchIcon } from './Icons'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { filterCommands } from '../app/commands'
@@ -88,7 +88,7 @@ export function CommandPalette() {
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="jobflow-command-search">
-          <Search size={17} className="shrink-0 text-muted" />
+          <SearchIcon size={17} className="shrink-0 text-muted" />
           <input
             ref={inputRef}
             value={query}
