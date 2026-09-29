@@ -2,6 +2,7 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  pointerWithin,
   useDraggable,
   useDroppable,
   useSensor,
@@ -153,7 +154,7 @@ export function KanbanBoard({ items, onOpen, onStatusChange }: KanbanBoardProps)
   }
 
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="overflow-x-auto pb-3">
         <div className="flex min-w-max gap-4">
           {kanbanColumns.map((column) => (
