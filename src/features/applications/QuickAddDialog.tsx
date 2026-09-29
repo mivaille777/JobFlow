@@ -111,7 +111,7 @@ export function QuickAddDialog({ open, onClose, onCreated }: QuickAddDialogProps
   }
 
   return (
-    <div className="jobflow-fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-950/25 p-4 backdrop-blur-[1px]">
+    <div className="jobflow-fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-950/20 p-4 backdrop-blur-md">
       <button
         type="button"
         aria-label="关闭新增岗位"
