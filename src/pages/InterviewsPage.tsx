@@ -101,11 +101,11 @@ export function InterviewsPage() {
   }
 
   return (
-    <section className="mx-auto max-w-6xl">
+    <section className="mx-auto w-full max-w-7xl">
       <div className="flex items-start justify-between gap-5">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Interviews</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">面试中心</h1>
+          <p className="jobflow-eyebrow">Interviews</p>
+          <h1 className="mt-2 jobflow-page-title">面试中心</h1>
           <p className="mt-2 text-sm text-muted">
             安排面试、查看 Upcoming，并在每一轮结束后完成技术复盘。
           </p>
@@ -146,7 +146,7 @@ export function InterviewsPage() {
         </div>
       )}
 
-      <div className="mt-5 overflow-hidden rounded-2xl border border-line bg-white shadow-panel">
+      <div className="mt-5 overflow-hidden rounded-2xl border border-line bg-white shadow-panel jobflow-surface-card">
         {loading ? (
           <div className="p-8 text-center text-sm text-muted">加载中…</div>
         ) : visible.length === 0 ? (
