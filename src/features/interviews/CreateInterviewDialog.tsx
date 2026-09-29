@@ -55,10 +55,10 @@ export function CreateInterviewDialog({ applications, onClose, onCreated }: Prop
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 p-5">
+    <div className="jobflow-fade-in fixed inset-0 z-50 flex items-center justify-center bg-slate-950/20 p-5 backdrop-blur-md">
       <form
         onSubmit={(event) => void submit(event)}
-        className="w-full max-w-lg rounded-2xl border border-line bg-white p-6 shadow-2xl"
+        className="jobflow-dialog-in w-full max-w-lg p-6"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
