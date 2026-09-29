@@ -1,8 +1,16 @@
-import { BriefcaseIcon, CalendarIcon, ChartIcon, CommandIconIcon, DashboardIcon, SettingsIcon } from './components/Icons'
+import { useEffect } from 'react'
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { navigationItems } from './app/navigation'
 import { applyThemePreference } from './app/theme'
-import { CommandIconPalette } from './components/CommandIconPalette'
+import {
+  BriefcaseIcon,
+  CalendarIcon,
+  ChartIcon,
+  CommandIcon,
+  DashboardIcon,
+  SettingsIcon
+} from './components/Icons'
+import { CommandPalette } from './components/CommandPalette'
 import { ToastViewport } from './components/ToastViewport'
 import { AnalyticsPage } from './pages/AnalyticsPage'
 import { ApplicationsPage } from './pages/ApplicationsPage'
@@ -100,7 +108,7 @@ export default function App() {
         </main>
       </div>
 
-      <CommandIconPalette />
+      <CommandPalette />
       <ToastViewport />
     </div>
   )
