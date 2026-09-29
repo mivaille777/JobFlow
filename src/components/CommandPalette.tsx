@@ -1,3 +1,4 @@
+import { Search } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { filterCommands } from '../app/commands'
@@ -47,8 +48,16 @@ export function CommandPalette() {
       }
     }
 
+    function openFromUi() {
+      setOpen(true)
+    }
+
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    window.addEventListener('jobflow:open-command-palette', openFromUi)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('jobflow:open-command-palette', openFromUi)
+    }
   }, [navigate, open])
 
   useEffect(() => {
@@ -71,14 +80,15 @@ export function CommandPalette() {
 
   return (
     <div
-      className="jobflow-fade-in fixed inset-0 z-[100] flex items-start justify-center bg-slate-950/35 px-4 pt-[14vh] backdrop-blur-sm"
+      className="jobflow-fade-in fixed inset-0 z-[100] flex items-start justify-center bg-slate-950/20 px-4 pt-[13vh] backdrop-blur-md"
       onMouseDown={() => setOpen(false)}
     >
       <div
-        className="jobflow-dialog-in w-full max-w-xl overflow-hidden rounded-2xl border border-line bg-white shadow-2xl"
+        className="jobflow-dialog-in jobflow-command-palette w-full max-w-xl overflow-hidden"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <div className="border-b border-line p-3">
+        <div className="jobflow-command-search">
+          <Search size={17} className="shrink-0 text-muted" />
           <input
             ref={inputRef}
             value={query}
@@ -104,9 +114,10 @@ export function CommandPalette() {
                 if (command) execute(command.path)
               }
             }}
-            placeholder="输入命令、页面或功能…"
-            className="w-full rounded-xl border-0 bg-slate-50 px-4 py-3 text-sm outline-none"
+            placeholder="搜索页面、功能或命令…"
+            className="min-w-0 flex-1 border-0 bg-transparent py-3 text-sm outline-none"
           />
+          <kbd className="jobflow-kbd">Esc</kbd>
         </div>
 
         <div className="max-h-[360px] overflow-y-auto p-2">
@@ -120,28 +131,24 @@ export function CommandPalette() {
                 onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => execute(command.path)}
                 className={[
-                  'flex w-full items-center justify-between gap-4 rounded-xl px-3 py-3 text-left transition duration-150 ease-out',
-                  index === activeIndex ? 'bg-slate-100' : 'hover:bg-slate-50'
+                  'jobflow-command-row',
+                  index === activeIndex ? 'is-active' : ''
                 ].join(' ')}
               >
                 <div className="min-w-0">
                   <div className="text-sm font-medium">{command.label}</div>
                   <div className="mt-0.5 truncate text-xs text-muted">{command.description}</div>
                 </div>
-                {command.shortcut && (
-                  <kbd className="shrink-0 rounded-md border border-line bg-white px-2 py-1 text-[10px] text-muted">
-                    {command.shortcut}
-                  </kbd>
-                )}
+                {command.shortcut && <kbd className="jobflow-kbd">{command.shortcut}</kbd>}
               </button>
             ))
           )}
         </div>
 
-        <div className="flex gap-4 border-t border-line px-4 py-2 text-[10px] text-muted">
+        <div className="jobflow-command-footer">
           <span>↑↓ 选择</span>
           <span>Enter 打开</span>
-          <span>Esc 关闭</span>
+          <span>Ctrl N 新增岗位</span>
         </div>
       </div>
     </div>
