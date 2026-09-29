@@ -47,7 +47,7 @@ export default function App() {
       <div className="jobflow-windowbar" aria-hidden="true">
         <div className="jobflow-windowbar-brand">
           <span className="jobflow-windowbar-mark">J</span>
-          <span>JobFlow</span>
+          <span>Workspace</span>
         </div>
       </div>
 
