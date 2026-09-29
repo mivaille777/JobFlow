@@ -202,7 +202,7 @@ test('投递选项自定义、校招/实习筛选与删除岗位', async () => {
     await expect(row.getByText('实习', { exact: true })).toBeVisible()
 
     await row.click()
-    const deleteDrawer = page.locator('aside').filter({ hasText: 'Intern Agent Engineer' })
+    const deleteDrawer = page.getByRole('complementary', { name: '岗位详情' })\n    await expect(deleteDrawer.getByText('Intern Agent Engineer', { exact: true })).toBeVisible()
     await deleteDrawer.getByRole('button', { name: '删除岗位' }).click()
     await deleteDrawer.getByRole('button', { name: '确认删除' }).click()
     await expect(page.getByText('岗位已删除', { exact: true })).toBeVisible()
