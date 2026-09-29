@@ -157,7 +157,7 @@ export function ApplicationDetailDrawer({
       <button
         type="button"
         aria-label="关闭岗位详情"
-        className="jobflow-fade-in absolute inset-0 bg-slate-950/15"
+        className="jobflow-fade-in absolute inset-0 bg-slate-950/15 backdrop-blur-[2px]"
         onClick={onClose}
       />
       <aside className="jobflow-drawer-in absolute inset-y-0 right-0 flex w-full max-w-[480px] flex-col border-l border-line bg-white shadow-2xl">
