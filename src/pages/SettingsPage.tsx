@@ -99,9 +99,9 @@ export function SettingsPage() {
   }
 
   return (
-    <section className="mx-auto max-w-5xl">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Settings</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight">设置</h1>
+    <section className="mx-auto w-full max-w-7xl">
+      <p className="jobflow-eyebrow">Settings</p>
+      <h1 className="mt-2 jobflow-page-title">设置</h1>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
         管理外观、岗位录入偏好和本地数据。Workflow 状态保持系统固定，保证统计口径稳定。
       </p>
@@ -134,7 +134,7 @@ export function SettingsPage() {
       </section>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
-        <section className="rounded-2xl border border-line bg-white p-6 shadow-panel">
+        <section className="rounded-2xl border border-line bg-white p-6 shadow-panel jobflow-surface-card">
           <div>
             <h2 className="text-base font-semibold">Excel 数据迁移</h2>
             <p className="mt-2 text-sm leading-6 text-muted">
@@ -164,7 +164,7 @@ export function SettingsPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-line bg-white p-6 shadow-panel">
+        <section className="rounded-2xl border border-line bg-white p-6 shadow-panel jobflow-surface-card">
           <div>
             <h2 className="text-base font-semibold">完整本地备份</h2>
             <p className="mt-2 text-sm leading-6 text-muted">
