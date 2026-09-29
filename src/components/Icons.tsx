@@ -1,4 +1,4 @@
-import type { SVGProps } from 'react'
+import type { ReactNode, SVGProps } from 'react'
 
 type IconProps = SVGProps<SVGSVGElement> & { size?: number }
 
@@ -6,7 +6,7 @@ function IconBase({
   size = 16,
   children,
   ...props
-}: IconProps & { children: React.ReactNode }) {
+}: IconProps & { children: ReactNode }) {
   return (
     <svg
       width={size}
